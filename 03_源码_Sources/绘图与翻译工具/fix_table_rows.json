@@ -1,0 +1,305 @@
+{
+ "p12.PART1[30]": [
+  [
+   "10,000",
+   "100,000,000",
+   "meltdown"
+  ]
+ ],
+ "p12.PART1[42]": [
+  [
+   "Inference memory (as chat grows)",
+   "grows with the chat",
+   "fixed",
+   "fixed"
+  ],
+  [
+   "Long-text memory",
+   "limited by the window",
+   "unreliable",
+   "state can extend indefinitely"
+  ],
+  [
+   "Compute per unit length",
+   "quadratic O(T²)",
+   "linear O(T)",
+   "linear O(T)"
+  ]
+ ],
+ "p12.PART2[3]": [
+  [
+   "W",
+   "Weight (time weight)",
+   "the discipline monitor of time",
+   "decides the discount on past memories - the older, the deeper the cut"
+  ],
+  [
+   "K",
+   "Key",
+   "each student's name tag",
+   "the label each word in a sentence carries"
+  ],
+  [
+   "V",
+   "Value",
+   "each student's speech script",
+   "the actual content each word carries"
+  ]
+ ],
+ "p12.PART2[15]": [
+  [
+   "e^u",
+   "bonus for the current token",
+   "extra weight when it is this token's turn"
+  ],
+  [
+   "wkvₜ",
+   "the step's output",
+   "the weighted-average memory computed from the ledger"
+  ]
+ ],
+ "p12.PART2[45]": [
+  [
+   "Inference (generating word by word)",
+   "the recurrent face",
+   "carry only the ledger, not the whole sentence - saves memory"
+  ]
+ ],
+ "p345.PART3[11]": [
+  [
+   "What it can store",
+   "score-sum memory",
+   "a K-to-V association table"
+  ],
+  [
+   "Per-head state size",
+   "D numbers",
+   "64×64 = 4096 cells"
+  ],
+  [
+   "Expressiveness",
+   "adequate",
+   "greatly improved (paper Fig. 2 capability comparison)"
+  ]
+ ],
+ "p345.PART4[16]": [
+  [
+   "DD",
+   "erase-then-write (Delta subtraction)",
+   "✗ / ✗ / ✓",
+   "✓",
+   "✓"
+  ],
+  [
+   "GE",
+   "generalized expressiveness (rotatable erasure, adjustable strength)",
+   "✗",
+   "✗",
+   "✓"
+  ]
+ ],
+ "p345.PART4[27]": [
+  [
+   "RWKV7-World3-1.5B/2.9B",
+   "World v3 + increments",
+   "1.5B/2.9B",
+   "Apache 2.0"
+  ]
+ ],
+ "p345.PART5[9]": [
+  [
+   "rwkv (pip)",
+   "pypi.org/project/rwkv",
+   "lightweight inference package - the one we used in the previous section"
+  ]
+ ],
+ "p345.PART5[14]": [
+  [
+   "language",
+   "17",
+   "language models, graph neural networks"
+  ],
+  [
+   "audio / speech",
+   "14",
+   "speech recognition, audio generation"
+  ]
+ ],
+ "p345.APPENDIX[1]": [
+  [
+   "6",
+   "The Evolution of RWKV",
+   "2411.02795",
+   "survey",
+   "A survey of RWKV architecture evolution (with a benchmark compilation)"
+  ],
+  [
+   "7",
+   "A Survey of RWKV",
+   "2412.14847",
+   "survey",
+   "Another RWKV survey: language-task performance, ecosystem, and comparisons with Mamba"
+  ]
+ ],
+ "p345.APPENDIX[3]": [
+  [
+   "state tuning",
+   "lightweight tuning that adjusts only the little notebook (state), not the whole model"
+  ],
+  [
+   "induction heads",
+   "internal circuitry that discovers the \"A B ... A implies B\" copy pattern"
+  ]
+ ],
+ "p345.APPENDIX[6]": [
+  [
+   "3D / video",
+   "StateLinFormer navigation (2026)",
+   "state carried across batches = learning over infinitely long sequences"
+  ],
+  [
+   "audio",
+   "EVA speech representative paper (2026)",
+   "RWKV encoding audio streams"
+  ],
+  [
+   "medical",
+   "multi-query RWKV pathology slides (2026)",
+   "whole-slide image analysis over long sequences"
+  ]
+ ],
+ "p6.PART6[9]": [
+  [
+   "dialogue",
+   "10%~15%",
+   "Q&A pairs and chat logs (to practice dialogue)"
+  ],
+  [
+   "math and symbols",
+   "5%~10%",
+   "math problems, formulas (to practice reasoning)"
+  ]
+ ],
+ "p6.PART6[35]": [
+  [
+   "loss stays flat for a long time",
+   "learning rate too small, or data too dirty",
+   "multiply lr by 3 and retry; spot-check 100 samples by eye"
+  ],
+  [
+   "VRAM explodes",
+   "batch too large",
+   "reduce batch or use gradient accumulation (small batches, accumulate, then step)"
+  ],
+  [
+   "validation loss rises",
+   "overfitting (the model memorized the training set)",
+   "add data / early-stop (roll back to the checkpoint before the rise)"
+  ]
+ ],
+ "p6.PART6[48]": [
+  [
+   "gradient clipping",
+   "1.0",
+   "a general guardrail"
+  ],
+  [
+   "batch size (tokens/step)",
+   "0.5M",
+   "lower end of the empirical range; use gradient accumulation if VRAM runs out"
+  ],
+  [
+   "validation frequency",
+   "every 500~1000 steps",
+   "catch overfitting early"
+  ]
+ ],
+ "p6.PART6[63]": [
+  [
+   "MMLU",
+   "57-subject multiple choice (knowledge breadth)",
+   "5-shot ABCD selection",
+   "large-model class: tens of billions of parameters to reach 60"
+  ],
+  [
+   "MQAR",
+   "multi-query associative recall (memory capacity)",
+   "hide KV pairs, then quiz",
+   "72.9% at 256 pairs (paper)"
+  ],
+  [
+   "multilingual LAMBADA",
+   "cross-lingual understanding",
+   "same protocol, multilingual corpora",
+   "see paper Table 4"
+  ]
+ ],
+ "p7.PART7[3]": [
+  [
+   "inference is extremely slow",
+   "running fp32 on CPU; the wkv CUDA kernel is not installed",
+   "use community-built inference projects (ai00 / rwkv.cpp); do not run a bare for-loop"
+  ],
+  [
+   "the browser build fails",
+   "the browser does not support WebGPU",
+   "switch to a recent Chrome / Edge (WebGPU needs a recent engine)"
+  ],
+  [
+   "quantized model fails to load",
+   "quantization format version mismatch (tools iterate fast)",
+   "re-quantize with a converter from the same era as the model"
+  ]
+ ],
+ "p7.PART7[5]": [
+  [
+   "the Mac build is slow",
+   "the MPS backend lacks optimization for some kernels",
+   "fine for small models; for big training rent cloud GPUs"
+  ],
+  [
+   "PyTorch version mismatch",
+   "kernels are tied to framework versions",
+   "install the version pinned in the project README; do not chase the newest"
+  ],
+  [
+   "VRAM seems \"cut in half\" under WSL",
+   "WSL reserves a chunk of VRAM",
+   "do large training under dual-boot or in the cloud"
+  ]
+ ],
+ "p7.PART7[14]": [
+  [
+   "low-end computers (no discrete GPU)",
+   "rwkv.cpp (C++ quantized inference)",
+   "quantized models run smoothly even on CPU"
+  ],
+  [
+   "home gaming laptops / workstations",
+   "ai00_server (local inference service)",
+   "runs straight on the GPU, fast; build your own local chat service"
+  ],
+  [
+   "edge modules (farm machinery, IoT)",
+   "Quectel high-compute modules (shown at WAIC 2025)",
+   "put RWKV into tractors, cameras, and sensors"
+  ]
+ ],
+ "p7.PART7[22]": [
+  [
+   "open-source community",
+   "fully open under Apache 2.0; incubated by the LFAI & Data foundation; global volunteers",
+   "projects like RWKV-Runner / ai00 / rwkv.cpp emerged spontaneously"
+  ],
+  [
+   "industry (edge side)",
+   "Quectel modules landing in IoT; the Flutter APP covers phones and desktops",
+   "edge solution shown at WAIC 2025"
+  ],
+  [
+   "industry (chips)",
+   "the RPU dedicated-chip plan is moving forward",
+   "Peng Bo's 2023 \"the decisive battle is in hardware\" declaration is being fulfilled (Chapter 17)"
+  ]
+ ]
+}

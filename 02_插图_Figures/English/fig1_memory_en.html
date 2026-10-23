@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Helvetica Neue", "Arial", sans-serif; }
+  body { background: #FFFFFF; padding: 28px; }
+  #root { width: 1180px; }
+  .title { font-size: 26px; font-weight: 700; color: #1F2937; text-align: center; margin-bottom: 6px; }
+  .subtitle { font-size: 14px; color: #6B7280; text-align: center; margin-bottom: 22px; }
+  .cols { display: flex; gap: 18px; }
+  .card { flex: 1; border-radius: 14px; border: 1.5px solid #E2E8F0; background: #F8FAFC; padding: 20px 18px; }
+  .card.hero { background: #EFF6FF; border: 2px solid #3AAFA9; }
+  .card h3 { font-size: 19px; color: #1F2937; margin-bottom: 3px; }
+  .card .en { font-size: 12px; color: #94A3B8; margin-bottom: 12px; }
+  .scene { font-size: 14.5px; color: #475569; background: #FFFFFF; border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; line-height: 1.7; min-height: 96px; }
+  .scene b { color: #1F2937; }
+  .row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+  .tag { flex-shrink: 0; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 6px; }
+  .good { background: #F0FDF4; color: #065F46; border: 1px solid #A7F3D0; }
+  .bad  { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+  .row p { font-size: 13.5px; color: #475569; line-height: 1.55; }
+  .hero .good { background: #FFFFFF; }
+  .conclusion { margin-top: 20px; background: #EFF6FF; border: 1.5px solid #3AAFA9; border-radius: 12px; padding: 14px 20px; text-align: center; }
+  .conclusion p { font-size: 16px; font-weight: 600; color: #134E4A; }
+  .conclusion span { font-weight: 400; color: #475569; font-size: 14px; }
+</style>
+</head>
+<body>
+<div id="root">
+  <div class="title">How to choose among three "memory methods"?</div>
+  <div class="subtitle">Language models need to read and remember simultaneously—metaphors and costs of three architectures</div>
+  <div class="cols">
+    <div class="card">
+      <h3>Transformer</h3>
+      <div class="en">Passing notes in class</div>
+      <div class="scene">When recalling the 1st word,<b>The current word sends a note to every previous word,</b>waits for replies, then tallies votes. More words = more notes.</div>
+      <div class="row"><span class="tag good">Pros</span><p>Training can be done in parallel by the whole class, seeing everything comprehensively</p></div>
+      <div class="row"><span class="tag bad">Cons</span><p>During inference, number of notes ≈ words²: double sequence length, quadruple overhead; must keep all notes, memory keeps growing</p></div>
+    </div>
+    <div class="card">
+      <h3>Traditional RNN</h3>
+      <div class="en">Single person passing a message</div>
+      <div class="scene">Only one messenger with a small cheat sheet (hidden state): after hearing each word, they<b>modify the cheat sheet</b>and pass it to the next version of themselves.</div>
+      <div class="row"><span class="tag good">Pros</span><p>Fixed cheat sheet size: inference memory is constant, doesn't grow with length</p></div>
+      <div class="row"><span class="tag bad">Cons</span><p>Training must be done sequentially one after another; cheat sheet gets overwritten repeatedly, distant words are easily forgotten</p></div>
+    </div>
+    <div class="card hero">
+      <h3>RWKV</h3>
+      <div class="en">The messenger who keeps accounts</div>
+      <div class="scene">Still the messenger modifying the cheat sheet, but it upgrades to<b>two account books</b>(numerator + denominator), with a carefully designed accounting formula that can also discount old memories.</div>
+      <div class="row"><span class="tag good">Pros</span><p>Training like Transformer's full class parallelism; inference like RNN's single account book everywhere (constant memory)</p></div>
+      <div class="row"><span class="tag good">Pros</span><p>Computation grows linearly with length O(Td), memory constant O(d)</p></div>
+    </div>
+  </div>
+  <div class="conclusion">
+    <p>RWKV's goal: have the best of both worlds<span>— Train as fast as Transformer, infer as efficiently as RNN</span></p>
+  </div>
+</div>
+</body>
+</html>

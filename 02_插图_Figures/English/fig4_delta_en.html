@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Helvetica Neue", "Arial", sans-serif; }
+  body { background: #FFFFFF; padding: 28px; }
+  #root { width: 1120px; }
+  .title { font-size: 26px; font-weight: 700; color: #1F2937; text-align: center; margin-bottom: 6px; }
+  .subtitle { font-size: 14px; color: #6B7280; text-align: center; margin-bottom: 20px; }
+  .panels { display: flex; gap: 18px; margin-bottom: 18px; }
+  .panel { flex: 1; border-radius: 14px; border: 1.5px solid #E2E8F0; padding: 16px 18px; }
+  .panel.bad { background: #F8FAFC; }
+  .panel.good { background: #EFF6FF; border: 2px solid #3AAFA9; }
+  .panel h3 { font-size: 17px; color: #1F2937; margin-bottom: 10px; }
+  .panel h3 .tag { font-size: 12px; padding: 2px 9px; border-radius: 6px; margin-right: 8px; vertical-align: 2px; }
+  .bad .tag { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+  .good .tag { background: #FFFFFF; color: #134E4A; border: 1px solid #99E5DB; }
+  .wall { display: flex; gap: 6px; margin-bottom: 12px; }
+  .sticker { flex: 1; border-radius: 8px; padding: 8px 6px; text-align: center; font-size: 12.5px; line-height: 1.45; }
+  .sticker.old { background: #E2E8F0; color: #64748B; }
+  .sticker.new { background: #DBEAFE; color: #1E40AF; font-weight: 600; }
+  .sticker.ghost { border: 1.5px dashed #FCA5A5; background: #FFFFFF; color: #B91C1C; }
+  .caption { font-size: 13px; color: #475569; line-height: 1.7; }
+  .caption b { color: #1F2937; }
+  .formula { margin-top: 16px; background: #F0F4F8; border-left: 4px solid #5B7A99; border-radius: 10px; padding: 13px 18px; }
+  .formula p { font-size: 14.5px; color: #334155; line-height: 1.8; font-family: "Consolas", "PingFang SC", monospace; }
+  .formula .cn { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; color: #64748B; font-size: 13px; }
+  .bottom { text-align: center; font-size: 15px; color: #134E4A; background: #EFF6FF; border: 1.5px solid #3AAFA9; border-radius: 12px; padding: 12px; }
+  .bottom span { color: #475569; font-size: 13.5px; }
+</style>
+</head>
+<body>
+<div id="root">
+  <div class="title">RWKV-7 state update: erase before write (Generalized Delta Rule)</div>
+  <div class="subtitle">Same 'sticker wall', two different recording methods yield completely different results</div>
+  <div class="panels">
+    <div class="panel bad">
+      <h3><span class="tag">Old method</span>Direct stacking: new stickers cover old ones, old ones remain</h3>
+      <div class="wall">
+        <div class="sticker old">Old content<br>Red apple</div>
+        <div class="sticker new">New write<br>Green apple</div>
+      </div>
+      <div class="caption">Write =<b>Old state + New content</b>Repeated writing at the same position makes <b>old and new content mix together</b>— red and green apples pile up on the wall, reading out as 'both red and green'.</div>
+    </div>
+    <div class="panel good">
+      <h3><span class="tag">RWKV-7</span>Erase before write: tear off old content before sticking new ones</h3>
+      <div class="wall">
+        <div class="sticker ghost">Old content is torn away<br>(Erasure amount = a·old value)</div>
+        <div class="sticker new">New write<br>Green apple</div>
+      </div>
+      <div class="caption">Write =<b>Old state − (torn old content) + New content</b>. How much to tear is determined by two forces:<b>a</b>The pencil pressure (learning rate, how fast to tear),<b>w</b>The eraser (time decay, gradual fading over time).</div>
+    </div>
+  </div>
+  <div class="formula">
+    <p>sₜ = sₜ₋₁ · ( diag(wₜ) − κ̂ₜᵀ(aₜ ⊙ κ̂ₜ) ) + vₜᵀ·k̃ₜ<br>
+    <span class="cn">Reading method: multiply old ledger by 'eraser diag(w)', subtract 'torn old content along κ̂ direction', then stick new word's card vᵀ·k̃.</span></p>
+  </div>
+  <div class="bottom">Why is it strong? — This step mathematically equals 'the model does a small online learning for each word read'<span>(RWKV-7 paper proves: it can solve harder problem classes than old Delta Rule)</span>
+  </div>
+</div>
+</body>
+</html>

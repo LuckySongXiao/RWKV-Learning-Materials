@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Helvetica Neue", "Arial", sans-serif; }
+  body { background: #FFFFFF; padding: 28px; }
+  #root { width: 1240px; }
+  .title { font-size: 26px; font-weight: 700; color: #1F2937; text-align: center; margin-bottom: 6px; }
+  .subtitle { font-size: 14px; color: #6B7280; text-align: center; margin-bottom: 26px; }
+  .timeline { position: relative; padding: 0 10px; }
+  .axis { position: absolute; left: 10px; right: 10px; top: 33px; height: 3px; background: #CBD5E1; border-radius: 2px; }
+  .items { display: flex; justify-content: space-between; position: relative; }
+  .item { width: 138px; text-align: center; }
+  .dot { width: 15px; height: 15px; border-radius: 50%; margin: 22px auto 10px; border: 3px solid #5B7A99; background: #FFFFFF; }
+  .item.major .dot { background: #5B7A99; }
+  .date { font-size: 12.5px; color: #64748B; font-weight: 600; }
+  .ver { font-size: 15.5px; font-weight: 700; color: #1F2937; margin: 3px 0; }
+  .code { font-size: 11.5px; color: #94A3B8; margin-bottom: 7px; }
+  .desc { font-size: 12.5px; color: #475569; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 9px; padding: 7px 8px; line-height: 1.6; min-height: 84px; }
+  .item.major .desc { background: #EFF6FF; border-color: #A5C8E4; }
+  .legend { margin-top: 24px; text-align: center; font-size: 12.5px; color: #64748B; }
+</style>
+</head>
+<body>
+<div id="root">
+  <div class="title">RWKV architecture evolution: From experiment to surpassing</div>
+  <div class="subtitle">Dark dots = milestones with published papers (as of Oct 2026)</div>
+  <div class="timeline">
+    <div class="axis"></div>
+    <div class="items">
+      <div class="item"><div class="dot"></div><div class="date">2021.08</div><div class="ver">RWKV-1</div><div class="code">First commit</div><div class="desc">Long convolution replaces attention; R/W/K/V four main characters named</div></div>
+      <div class="item"><div class="dot"></div><div class="date">2022</div><div class="ver">RWKV-2</div><div class="code">RNN-style improvement</div><div class="desc">WKV truly becomes RNN form, scale first expanded</div></div>
+      <div class="item"><div class="dot"></div><div class="date">2022.12</div><div class="ver">RWKV-3</div><div class="code">Optimization enhancement</div><div class="desc">Initialization and training technique refinement, performance approaches mainstream at the time</div></div>
+      <div class="item major"><div class="dot"></div><div class="date">2023.05</div><div class="ver">RWKV-4</div><div class="code">EMNLP 2023</div><div class="desc">Foundational paper: Training parallel + inference constant memory; 0.1B-14B full series released</div></div>
+      <div class="item major"><div class="dot"></div><div class="date">2024.04</div><div class="ver">RWKV-5 Eagle</div><div class="code">TMLR 2024</div><div class="desc">Vector ledger upgraded to matrix card box (outer product memory)</div></div>
+      <div class="item major"><div class="dot"></div><div class="date">2024.04</div><div class="ver">RWKV-6 Finch</div><div class="code">TMLR 2024</div><div class="desc">Discounts no longer fixed: data-dependent 'changing discounts' (ddlerp+LoRA)</div></div>
+      <div class="item major"><div class="dot"></div><div class="date">2025.03</div><div class="ver">RWKV-7 Goose</div><div class="code">ICLR 2025</div><div class="desc">Generalized Delta Rule: erase before write, continue learning during inference</div></div>
+      <div class="item"><div class="dot"></div><div class="date">2026</div><div class="ver">RWKV-8</div><div class="code">Heron · Coming soon</div><div class="desc">DeepEmbed + ROSA mechanism (community experiment in progress)</div></div>
+    </div>
+  </div>
+  <div class="legend">Every generation keeps the same promise: parallel training, constant memory inference — only changes 'how the ledger records'</div>
+</div>
+</body>
+</html>

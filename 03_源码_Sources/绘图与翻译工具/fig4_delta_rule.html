@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
+  body { background: #FFFFFF; padding: 28px; }
+  #root { width: 1120px; }
+  .title { font-size: 26px; font-weight: 700; color: #1F2937; text-align: center; margin-bottom: 6px; }
+  .subtitle { font-size: 14px; color: #6B7280; text-align: center; margin-bottom: 20px; }
+  .panels { display: flex; gap: 18px; margin-bottom: 18px; }
+  .panel { flex: 1; border-radius: 14px; border: 1.5px solid #E2E8F0; padding: 16px 18px; }
+  .panel.bad { background: #F8FAFC; }
+  .panel.good { background: #EFF6FF; border: 2px solid #3AAFA9; }
+  .panel h3 { font-size: 17px; color: #1F2937; margin-bottom: 10px; }
+  .panel h3 .tag { font-size: 12px; padding: 2px 9px; border-radius: 6px; margin-right: 8px; vertical-align: 2px; }
+  .bad .tag { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+  .good .tag { background: #FFFFFF; color: #134E4A; border: 1px solid #99E5DB; }
+  .wall { display: flex; gap: 6px; margin-bottom: 12px; }
+  .sticker { flex: 1; border-radius: 8px; padding: 8px 6px; text-align: center; font-size: 12.5px; line-height: 1.45; }
+  .sticker.old { background: #E2E8F0; color: #64748B; }
+  .sticker.new { background: #DBEAFE; color: #1E40AF; font-weight: 600; }
+  .sticker.ghost { border: 1.5px dashed #FCA5A5; background: #FFFFFF; color: #B91C1C; }
+  .caption { font-size: 13px; color: #475569; line-height: 1.7; }
+  .caption b { color: #1F2937; }
+  .formula { margin-top: 16px; background: #F0F4F8; border-left: 4px solid #5B7A99; border-radius: 10px; padding: 13px 18px; }
+  .formula p { font-size: 14.5px; color: #334155; line-height: 1.8; font-family: "Consolas", "PingFang SC", monospace; }
+  .formula .cn { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; color: #64748B; font-size: 13px; }
+  .bottom { text-align: center; font-size: 15px; color: #134E4A; background: #EFF6FF; border: 1.5px solid #3AAFA9; border-radius: 12px; padding: 12px; }
+  .bottom span { color: #475569; font-size: 13.5px; }
+</style>
+</head>
+<body>
+<div id="root">
+  <div class="title">RWKV-7 状态更新：先擦后写（广义 Delta 规则）</div>
+  <div class="subtitle">同一面"贴纸墙"，两种记账方式的结果完全不同</div>
+  <div class="panels">
+    <div class="panel bad">
+      <h3><span class="tag">旧写法</span>直接叠加：新贴纸盖上去，旧的还在</h3>
+      <div class="wall">
+        <div class="sticker old">旧内容<br>红苹果</div>
+        <div class="sticker new">新写入<br>绿苹果</div>
+      </div>
+      <div class="caption">写入 = <b>旧状态 + 新内容</b>。同一个位置反复写，新旧内容会<b>搅在一起</b>——墙上红绿苹果叠成一团，读出来是"又红又绿"。</div>
+    </div>
+    <div class="panel good">
+      <h3><span class="tag">RWKV-7</span>先擦后写：把旧内容撕下来，再贴新的</h3>
+      <div class="wall">
+        <div class="sticker ghost">旧内容被撕走<br>（擦除量 = a·旧值）</div>
+        <div class="sticker new">新写入<br>绿苹果</div>
+      </div>
+      <div class="caption">写入 = <b>旧状态 −（撕掉的旧内容）+ 新内容</b>。撕多少由两股力量决定：<b>a</b> 是铅笔力度（学习率，撕得快不快），<b>w</b> 是橡皮擦（时间衰减，平时慢慢褪色）。</div>
+    </div>
+  </div>
+  <div class="formula">
+    <p>sₜ = sₜ₋₁ · ( diag(wₜ) − κ̂ₜᵀ(aₜ ⊙ κ̂ₜ) ) + vₜᵀ·k̃ₜ<br>
+    <span class="cn">读法：旧账本先乘"橡皮擦 diag(w)"，再减去"沿 κ̂ 方向撕掉的旧内容"，最后把新词的卡片 vᵀ·k̃ 贴上去。</span></p>
+  </div>
+  <div class="bottom">
+    为什么强？—— 这一步在数学上等于"每读一个词，模型都做一次小小的在线学习"
+    <span>（RWKV-7 论文证明：它能解决比老 Delta 规则更难的问题类）</span>
+  </div>
+</div>
+</body>
+</html>

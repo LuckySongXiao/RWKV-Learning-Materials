@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Helvetica Neue", "Arial", sans-serif; }
+  body { background: #FFFFFF; padding: 28px; }
+  #root { width: 1120px; }
+  .title { font-size: 26px; font-weight: 700; color: #1F2937; text-align: center; margin-bottom: 6px; }
+  .subtitle { font-size: 14px; color: #6B7280; text-align: center; margin-bottom: 20px; }
+  .steps { display: flex; flex-direction: column; gap: 14px; }
+  .phase { border-radius: 14px; border: 1.5px solid #E2E8F0; overflow: hidden; }
+  .phase-head { display: flex; align-items: center; gap: 10px; padding: 10px 18px; background: #F0F4F8; border-left: 4px solid #64748B; }
+  .phase-head.alt { background: #E8EDF2; border-left-color: #5B7A99; }
+  .phase-head .no { width: 26px; height: 26px; border-radius: 50%; background: #FFFFFF; border: 1.5px solid #64748B; color: #334155; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .phase-head h4 { font-size: 16.5px; color: #334155; }
+  .phase-head .formula { margin-left: auto; font-size: 14px; color: #475569; background: #FFFFFF; padding: 4px 12px; border-radius: 8px; border: 1px solid #DDE5EC; font-family: "Consolas", monospace; }
+  .phase-body { padding: 14px 18px; background: #FFFFFF; }
+  .flow { display: flex; align-items: center; gap: 8px; }
+  .node { flex: 1; background: #F8FAFC; border: 1.2px solid #94A3B8; border-radius: 10px; padding: 10px 12px; text-align: center; }
+  .node.hl { background: #FFF7ED; border: 1.5px solid #F59E0B; }
+  .node .n-t { font-size: 14.5px; font-weight: 600; color: #1F2937; }
+  .node .n-d { font-size: 12.5px; color: #64748B; margin-top: 3px; line-height: 1.5; }
+  .arrow { color: #94A3B8; font-size: 20px; flex-shrink: 0; }
+  .down { text-align: center; color: #94A3B8; font-size: 18px; margin: 2px 0; }
+  .example { margin-top: 18px; display: flex; gap: 14px; }
+  .ex-card { flex: 1; background: #F8FAFC; border: 1.2px dashed #94A3B8; border-radius: 12px; padding: 12px 16px; }
+  .ex-card h5 { font-size: 14px; color: #334155; margin-bottom: 6px; }
+  .ex-card p { font-size: 13px; color: #475569; line-height: 1.75; }
+  .ex-card b { color: #92400E; }
+</style>
+</head>
+<body>
+<div id="root">
+  <div class="title">WKV account book: for each new word, only two steps</div>
+  <div class="subtitle">RWKV-4 Time-Mixing's recurrent skeleton — the secret to constant memory</div>
+  <div class="steps">
+    <div class="phase">
+      <div class="phase-head"><span class="no">1</span><h4>Read accounts (output the answer for this step)</h4><span class="formula">wkvₜ = (aₜ₋₁ + e^(u+kₜ)·vₜ) ÷ (bₜ₋₁ + e^(u+kₜ))</span></div>
+      <div class="phase-body">
+        <div class="flow">
+          <div class="node"><div class="n-t">Old accounts a, b</div><div class="n-d">The two account books left from the previous step (fixed size)</div></div>
+          <div class="arrow">＋</div>
+          <div class="node"><div class="n-t">New token vote e^(u+k)·v</div><div class="n-d">Current token content v multiplied by speaking weight</div></div>
+          <div class="arrow">→</div>
+          <div class="node hl"><div class="n-t">Weighted average = output</div><div class="n-d">New numerator ÷ new denominator: one division completes 'account check'</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="down">↓ After accounting, pass to next step</div>
+    <div class="phase">
+      <div class="phase-head alt"><span class="no">2</span><h4>Bookkeeping (update two accounts)</h4><span class="formula">aₜ = e^(−w)·aₜ₋₁ + e^(kₜ)·vₜ　　bₜ = e^(−w)·bₜ₋₁ + e^(kₜ)</span></div>
+      <div class="phase-body">
+        <div class="flow">
+          <div class="node"><div class="n-t">Old account discounted e^(−w)</div><div class="n-d">Each token, old content uniformly multiplied by a factor < 1 (forgetfulness adjustable)</div></div>
+          <div class="arrow">＋</div>
+          <div class="node"><div class="n-t">New content added e^(k)·v</div><div class="n-d">Current token information written into account</div></div>
+          <div class="arrow">→</div>
+          <div class="node hl"><div class="n-t">New accounts aₜ, bₜ</div><div class="n-d">Size unchanged! Whether reading 100 or 100,000 tokens</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="example">
+    <div class="ex-card">
+      <h5>Manual example (discount 0.5, v = 2, 4, 8)</h5>
+      <p>Step 1: Account = 2 ÷ 1 → Output<b>2</b><br>Step 2: Account = (0.5×2+4) ÷ (0.5×1+1) = 5 ÷ 1.5 → Output<b>3.33</b><br>Step 3: Account = (0.5×5+8) ÷ (0.5×1.5+1) = 10.5 ÷ 1.75 → Output<b>6</b><br>Old content halved, new token speaks louder—this is 'remembering new things, forgetting old things'.</p>
+    </div>
+    <div class="ex-card">
+      <h5>Why constant memory?</h5>
+      <p>Regardless of sequence length, model only holds<b>two accounts a and b</b>(each fixed size d). Transformer keeps all T notes (memory ∝ T), RWKV only keeps 2 accounts (memory ∝ 1). This is what O(d) means in the table.</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

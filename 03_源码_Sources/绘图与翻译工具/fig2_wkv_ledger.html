@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
+  body { background: #FFFFFF; padding: 28px; }
+  #root { width: 1120px; }
+  .title { font-size: 26px; font-weight: 700; color: #1F2937; text-align: center; margin-bottom: 6px; }
+  .subtitle { font-size: 14px; color: #6B7280; text-align: center; margin-bottom: 20px; }
+  .steps { display: flex; flex-direction: column; gap: 14px; }
+  .phase { border-radius: 14px; border: 1.5px solid #E2E8F0; overflow: hidden; }
+  .phase-head { display: flex; align-items: center; gap: 10px; padding: 10px 18px; background: #F0F4F8; border-left: 4px solid #64748B; }
+  .phase-head.alt { background: #E8EDF2; border-left-color: #5B7A99; }
+  .phase-head .no { width: 26px; height: 26px; border-radius: 50%; background: #FFFFFF; border: 1.5px solid #64748B; color: #334155; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .phase-head h4 { font-size: 16.5px; color: #334155; }
+  .phase-head .formula { margin-left: auto; font-size: 14px; color: #475569; background: #FFFFFF; padding: 4px 12px; border-radius: 8px; border: 1px solid #DDE5EC; font-family: "Consolas", monospace; }
+  .phase-body { padding: 14px 18px; background: #FFFFFF; }
+  .flow { display: flex; align-items: center; gap: 8px; }
+  .node { flex: 1; background: #F8FAFC; border: 1.2px solid #94A3B8; border-radius: 10px; padding: 10px 12px; text-align: center; }
+  .node.hl { background: #FFF7ED; border: 1.5px solid #F59E0B; }
+  .node .n-t { font-size: 14.5px; font-weight: 600; color: #1F2937; }
+  .node .n-d { font-size: 12.5px; color: #64748B; margin-top: 3px; line-height: 1.5; }
+  .arrow { color: #94A3B8; font-size: 20px; flex-shrink: 0; }
+  .down { text-align: center; color: #94A3B8; font-size: 18px; margin: 2px 0; }
+  .example { margin-top: 18px; display: flex; gap: 14px; }
+  .ex-card { flex: 1; background: #F8FAFC; border: 1.2px dashed #94A3B8; border-radius: 12px; padding: 12px 16px; }
+  .ex-card h5 { font-size: 14px; color: #334155; margin-bottom: 6px; }
+  .ex-card p { font-size: 13px; color: #475569; line-height: 1.75; }
+  .ex-card b { color: #92400E; }
+</style>
+</head>
+<body>
+<div id="root">
+  <div class="title">WKV 记账本：每来一个新词，只做两步</div>
+  <div class="subtitle">RWKV-4 时间混合（Time-Mixing）的循环骨架 —— 常数内存的秘密</div>
+  <div class="steps">
+    <div class="phase">
+      <div class="phase-head"><span class="no">1</span><h4>读账（输出这一步的答案）</h4><span class="formula">wkvₜ = (aₜ₋₁ + e^(u+kₜ)·vₜ) ÷ (bₜ₋₁ + e^(u+kₜ))</span></div>
+      <div class="phase-body">
+        <div class="flow">
+          <div class="node"><div class="n-t">旧账 a、b</div><div class="n-d">上一步留下的两本账（固定大小）</div></div>
+          <div class="arrow">＋</div>
+          <div class="node"><div class="n-t">新词投票 e^(u+k)·v</div><div class="n-d">当前词的内容 v，乘上发言权重</div></div>
+          <div class="arrow">→</div>
+          <div class="node hl"><div class="n-t">加权平均 = 输出</div><div class="n-d">新账 ÷ 新分母账：一次除法完成"查账"</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="down">↓ 记完账，传给下一步</div>
+    <div class="phase">
+      <div class="phase-head alt"><span class="no">2</span><h4>记账（更新两本账）</h4><span class="formula">aₜ = e^(−w)·aₜ₋₁ + e^(kₜ)·vₜ　　bₜ = e^(−w)·bₜ₋₁ + e^(kₜ)</span></div>
+      <div class="phase-body">
+        <div class="flow">
+          <div class="node"><div class="n-t">旧账打折扣 e^(−w)</div><div class="n-d">每过一个词，旧内容统一乘一个小于 1 的折扣（忘性可调）</div></div>
+          <div class="arrow">＋</div>
+          <div class="node"><div class="n-t">新内容入账 e^(k)·v</div><div class="n-d">当前词的信息写进账本</div></div>
+          <div class="arrow">→</div>
+          <div class="node hl"><div class="n-t">新账 aₜ、bₜ</div><div class="n-d">大小不变！不管读了 100 还是 10 万个词</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="example">
+    <div class="ex-card">
+      <h5>手算例子（折扣 0.5，v = 2, 4, 8）</h5>
+      <p>第 1 步：账 = 2 ÷ 1 → 输出 <b>2</b><br>
+      第 2 步：账 = (0.5×2+4) ÷ (0.5×1+1) = 5 ÷ 1.5 → 输出 <b>3.33</b><br>
+      第 3 步：账 = (0.5×5+8) ÷ (0.5×1.5+1) = 10.5 ÷ 1.75 → 输出 <b>6</b><br>
+      旧内容被打了 5 折，新词说话更大声——这就是"记得住新事、忘得掉旧事"。</p>
+    </div>
+    <div class="ex-card">
+      <h5>为什么内存恒定？</h5>
+      <p>不管序列多长，模型手里<b>只有 a、b 两本账</b>（每本固定大小 d）。Transformer 要保留全部 T 张纸条（内存 ∝ T），RWKV 只留 2 本账（内存 ∝ 1）。这就是表中 O(d) 的含义。</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
+  body { background: #FFFFFF; padding: 28px; }
+  #root { width: 1180px; }
+  .title { font-size: 26px; font-weight: 700; color: #1F2937; text-align: center; margin-bottom: 6px; }
+  .subtitle { font-size: 14px; color: #6B7280; text-align: center; margin-bottom: 22px; }
+  .cols { display: flex; gap: 18px; }
+  .card { flex: 1; border-radius: 14px; border: 1.5px solid #E2E8F0; background: #F8FAFC; padding: 20px 18px; }
+  .card.hero { background: #EFF6FF; border: 2px solid #3AAFA9; }
+  .card h3 { font-size: 19px; color: #1F2937; margin-bottom: 3px; }
+  .card .en { font-size: 12px; color: #94A3B8; margin-bottom: 12px; }
+  .scene { font-size: 14.5px; color: #475569; background: #FFFFFF; border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; line-height: 1.7; min-height: 96px; }
+  .scene b { color: #1F2937; }
+  .row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+  .tag { flex-shrink: 0; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 6px; }
+  .good { background: #F0FDF4; color: #065F46; border: 1px solid #A7F3D0; }
+  .bad  { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+  .row p { font-size: 13.5px; color: #475569; line-height: 1.55; }
+  .hero .good { background: #FFFFFF; }
+  .conclusion { margin-top: 20px; background: #EFF6FF; border: 1.5px solid #3AAFA9; border-radius: 12px; padding: 14px 20px; text-align: center; }
+  .conclusion p { font-size: 16px; font-weight: 600; color: #134E4A; }
+  .conclusion span { font-weight: 400; color: #475569; font-size: 14px; }
+</style>
+</head>
+<body>
+<div id="root">
+  <div class="title">三种"记忆方式"怎么选？</div>
+  <div class="subtitle">语言模型要一边读一边记——三种架构的比喻与代价</div>
+  <div class="cols">
+    <div class="card">
+      <h3>Transformer</h3>
+      <div class="en">全班传纸条</div>
+      <div class="scene">要回忆第 1 个词时，<b>当前词向前面每一个词都发一张纸条</b>，等大家回传，再汇总投票。词越多，纸条越多。</div>
+      <div class="row"><span class="tag good">优</span><p>训练时全班可同时开工（并行），看得全面</p></div>
+      <div class="row"><span class="tag bad">劣</span><p>推理时纸条数 ≈ 词数²：序列翻倍，开销翻 4 倍；要保留所有纸条，内存一直涨</p></div>
+    </div>
+    <div class="card">
+      <h3>传统 RNN</h3>
+      <div class="en">单人传话</div>
+      <div class="scene">只请一位传话人，他手里只有一张小抄（隐藏状态）：每听完一个词就<b>把小抄改一改</b>，传给下一个自己。</div>
+      <div class="row"><span class="tag good">优</span><p>小抄大小固定：推理内存是常数，不随长度涨</p></div>
+      <div class="row"><span class="tag bad">劣</span><p>训练只能一个接一个排队（串行）；小抄会被反复覆盖，远处的词容易忘</p></div>
+    </div>
+    <div class="card hero">
+      <h3>RWKV</h3>
+      <div class="en">会记账的传话人</div>
+      <div class="scene">仍是传话人改小抄，但小抄升级成<b>两本账</b>（分子账+分母账），记账公式经过精心设计，还能打折忘旧。</div>
+      <div class="row"><span class="tag good">优</span><p>训练像 Transformer 全班并行；推理像 RNN 一本账走天下（常数内存）</p></div>
+      <div class="row"><span class="tag good">优</span><p>计算只随长度线性增长 O(Td)，内存恒定 O(d)</p></div>
+    </div>
+  </div>
+  <div class="conclusion">
+    <p>RWKV 的目标：鱼与熊掌兼得 <span>—— 训练快如 Transformer，推理省如 RNN</span></p>
+  </div>
+</div>
+</body>
+</html>

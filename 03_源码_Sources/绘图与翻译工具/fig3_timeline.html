@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
+  body { background: #FFFFFF; padding: 28px; }
+  #root { width: 1240px; }
+  .title { font-size: 26px; font-weight: 700; color: #1F2937; text-align: center; margin-bottom: 6px; }
+  .subtitle { font-size: 14px; color: #6B7280; text-align: center; margin-bottom: 26px; }
+  .timeline { position: relative; padding: 0 10px; }
+  .axis { position: absolute; left: 10px; right: 10px; top: 33px; height: 3px; background: #CBD5E1; border-radius: 2px; }
+  .items { display: flex; justify-content: space-between; position: relative; }
+  .item { width: 138px; text-align: center; }
+  .dot { width: 15px; height: 15px; border-radius: 50%; margin: 22px auto 10px; border: 3px solid #5B7A99; background: #FFFFFF; }
+  .item.major .dot { background: #5B7A99; }
+  .date { font-size: 12.5px; color: #64748B; font-weight: 600; }
+  .ver { font-size: 15.5px; font-weight: 700; color: #1F2937; margin: 3px 0; }
+  .code { font-size: 11.5px; color: #94A3B8; margin-bottom: 7px; }
+  .desc { font-size: 12.5px; color: #475569; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 9px; padding: 7px 8px; line-height: 1.6; min-height: 84px; }
+  .item.major .desc { background: #EFF6FF; border-color: #A5C8E4; }
+  .legend { margin-top: 24px; text-align: center; font-size: 12.5px; color: #64748B; }
+</style>
+</head>
+<body>
+<div id="root">
+  <div class="title">RWKV 架构演进：从实验到超越</div>
+  <div class="subtitle">深色圆点 = 发了正式论文的里程碑（截至 2026 年 10 月）</div>
+  <div class="timeline">
+    <div class="axis"></div>
+    <div class="items">
+      <div class="item"><div class="dot"></div><div class="date">2021.08</div><div class="ver">RWKV-1</div><div class="code">首个 commit</div><div class="desc">长卷积代替注意力；R/W/K/V 四主角定名</div></div>
+      <div class="item"><div class="dot"></div><div class="date">2022</div><div class="ver">RWKV-2</div><div class="code">RNN 化改进</div><div class="desc">WKV 真正变成 RNN 形式，规模首次拉大</div></div>
+      <div class="item"><div class="dot"></div><div class="date">2022.12</div><div class="ver">RWKV-3</div><div class="code">优化增强</div><div class="desc">初始化与训练技巧打磨，性能逼近当时主流</div></div>
+      <div class="item major"><div class="dot"></div><div class="date">2023.05</div><div class="ver">RWKV-4</div><div class="code">EMNLP 2023</div><div class="desc">开山论文：训练并行 + 推理常数内存；0.1B-14B 全系发布</div></div>
+      <div class="item major"><div class="dot"></div><div class="date">2024.04</div><div class="ver">RWKV-5 Eagle</div><div class="code">TMLR 2024</div><div class="desc">向量账本升级为矩阵卡片盒（外积记忆）</div></div>
+      <div class="item major"><div class="dot"></div><div class="date">2024.04</div><div class="ver">RWKV-6 Finch</div><div class="code">TMLR 2024</div><div class="desc">折扣不再固定：数据依赖的"会变脸的折扣"（ddlerp+LoRA）</div></div>
+      <div class="item major"><div class="dot"></div><div class="date">2025.03</div><div class="ver">RWKV-7 Goose</div><div class="code">ICLR 2025</div><div class="desc">广义 Delta 规则：先擦后写，推理时也能"继续学习"</div></div>
+      <div class="item"><div class="dot"></div><div class="date">2026</div><div class="ver">RWKV-8</div><div class="code">Heron · 预告中</div><div class="desc">DeepEmbed 深度嵌入 + ROSA 机制（社区实验推进中）</div></div>
+    </div>
+  </div>
+  <div class="legend">每一代都保持同一承诺：训练可并行，推理常数内存 —— 变的只是"账本怎么记"</div>
+</div>
+</body>
+</html>
