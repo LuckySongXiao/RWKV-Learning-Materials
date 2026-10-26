@@ -117,10 +117,51 @@ const PART7 = [
     "para": "When encountering problems, follow these four steps: (1) Read the last line of the error message (for Python errors, read from bottom to top—the first line is human-readable, the last few lines are the stack trace); (2) Minimize reproduction—reduce the problem to 10 lines of code or less; (3) Binary localization—change the model? Change the data? Change the parameters? Only change one at a time; (4) Search the GitHub issue area—you're 99% not the first person to encounter this pitfall. Learn the art of asking questions: post the complete error message, specify your environment (graphics card/system/versions), and provide a minimal reproduction code."
   },
   {
+    "h3": "24.5 Prompt-level pitfalls: one space worth 63 questions (community benchmark, Oct 2026)"
+  },
+  {
+    "para": "In October 2026, No.22 of the community project RWKV-Agent published a hardcore evaluation: a 568-question Agent exam (make the model read files, search the web, compute, write files), 17 controlled experiments on the RWKV-7 G1l 7B preview base model, 40 runs and 22,720 question-attempts in total, with per-question paired statistical tests. This benchmark turned \"how to write prompts\" from folklore into science. The four classic pitfalls below deserve to be printed on page 25."
+  },
+  {
+    "table": {
+      "header": [
+        "Pitfall",
+        "Measured consequence",
+        "Underlying reason"
+      ],
+      "rows": [
+        [
+          "A space after the colon in \"Assistant:\"",
+          "score drops 36% (175 to 112 questions); 97.8% of English questions get answered in Chinese",
+          "the vocabulary has no \"colon+space\" token. English words carry a leading space (\" Hello\"); the extra space forces the model to generate a \"no-leading-space\" version it has barely seen in training"
+        ],
+        [
+          "treating \"Let me check first\" as the final answer",
+          "about 30% of questions lost",
+          "the G1 family habitually says one sentence before emitting the tool call; the parser must tolerate \"commentary + call\""
+        ],
+        [
+          "merging the tool result and the reminder into one message",
+          "14.5 fewer correct questions (p=0.018)",
+          "the measured optimum is \"two consecutive User messages, reminder last\" - it breaks the spec yet works best; the RNN intuition of \"closer means fresher\" fails here"
+        ],
+        [
+          "copying the official demo sampling of T=1",
+          "clearly worse in Agent scenarios",
+          "an Agent must execute stably: T=0.3, top_p=0.5, presence 0.5, frequency 0.1, decay 0.996 is the measured recipe"
+        ]
+      ]
+    }
+  },
+  {
+    "para": "Three more lessons worth remembering: (1) the model will copy its own previous tool call - after removing the \"no tool needed\" exit tool, repeated calls jumped 30%; this kind of fault cannot be fixed by prompts, only by training data; (2) the stop condition must cover both EOS and the \"User\" marker - base models often never emit EOS and will keep writing the next turn themselves; (3) do not judge a prompt change by total score alone - when two prompts have close totals, they may be getting two entirely different sets of questions right; look at the behavior distribution. The full report is listed in Appendix A."
+  },
+  {
     "quiz": [
-      "【Multiple Choice】What is the most common cause of garbled output? A. Graphics card is too poor  B. Tokenizer doesn't match the model  C. Temperature set too high",
-      "【Short Answer】Why does the paper specifically include a \"numerically stable version\" formula? Explain using fp16 overflow.",
-      "【Hands-on】Copy the four-step pitfall elimination method from 24.4 on a sticky note and post it next to your computer—next time you encounter a bug, follow the steps in order."
+      "【Multiple Choice】What is the most common cause of garbled output? A. Graphics card is too poor  B. Tokenizer does not match the model  C. Temperature set too high",
+      "【Short Answer】Why does the paper specifically include a \"numerically stable version\" of the formula? Explain using fp16 overflow.",
+      "【Short Answer】With one extra space after \"Assistant:\", why do English questions get answered in Chinese? Explain using the \"leading space\" knowledge from Chapter 19.",
+      "【Hands-on】Copy the four-step pitfall elimination method from 24.4 on a sticky note and post it next to your computer - run through it in order the next time a bug appears."
     ]
   },
   {
@@ -235,6 +276,11 @@ const PART7 = [
           "industry (chips)",
           "the RPU dedicated-chip plan is moving forward",
           "Peng Bo's 2023 \"the decisive battle is in hardware\" declaration is being fulfilled (Chapter 17)"
+        ],
+        [
+          "Agent ecosystem",
+          "community projects like RWKV-Agent teach the G1 series to use tools: read files, search the web, write files",
+          "the Oct 2026 568-question benchmark turned prompt format and sampling into a science (Section 24.5)"
         ]
       ]
     }

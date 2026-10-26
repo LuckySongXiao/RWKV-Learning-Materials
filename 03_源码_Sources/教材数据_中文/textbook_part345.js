@@ -195,6 +195,7 @@ const APPENDIX = [
     ["6", "The Evolution of RWKV", "2411.02795", "综述", "RWKV 架构进化史综述（含性能基准汇编）"],
     ["7", "A Survey of RWKV", "2412.14847", "综述", "RWKV 又一篇综述：语言任务性能、生态、与 Mamba 等对比"],
   ]}},
+  { para: "补充资料（社区实测文档）：RWKV-Agent 项目的《基于 G1l 预览版：RWKV Agent 提示词、工具格式与采样分析》（No.22，2026-10-24，github.com/No-22-Github/RWKV-Agent · docs/evaluations）——568 题考卷 × 17 组对照实验，把 Agent 场景的提示词格式与采样参数做成科学；第 24.5 节的四个暗坑全部来自它。" },
   { h2: "附录 B：术语表（按拼音排序）" },
   { table: { header: ["术语", "本书译法与解释"], rows: [
     ["Transformer", "变换器（不是“变压器/变形金刚”）：注意力架构，ChatGPT 的骨架"],

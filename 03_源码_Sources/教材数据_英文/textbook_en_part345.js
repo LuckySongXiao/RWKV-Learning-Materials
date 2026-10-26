@@ -586,6 +586,9 @@ const APPENDIX = [
     }
   },
   {
+    "para": "Supplementary material (community benchmark): \"G1l Preview: RWKV Agent Prompt, Tool Format and Sampling Analysis\" by No.22, 2026-10-24, github.com/No-22-Github/RWKV-Agent (docs/evaluations) - a 568-question exam with 17 controlled experiments that turned Agent-scenario prompt format and sampling into a science; the four pitfalls in Section 24.5 all come from it."
+  },
+  {
     "h2": "Appendix B: Glossary (Sorted by Pinyin)"
   },
   {
