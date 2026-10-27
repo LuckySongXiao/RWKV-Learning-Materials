@@ -157,11 +157,160 @@ const PART7 = [
     "para": "Three more lessons worth remembering: (1) the model will copy its own previous tool call - after removing the \"no tool needed\" exit tool, repeated calls jumped 30%; this kind of fault cannot be fixed by prompts, only by training data; (2) the stop condition must cover both EOS and the \"User\" marker - base models often never emit EOS and will keep writing the next turn themselves; (3) do not judge a prompt change by total score alone - when two prompts have close totals, they may be getting two entirely different sets of questions right; look at the behavior distribution. The full report is listed in Appendix A."
   },
   {
+    "h3": "24.6 Post-training: teaching the model to actually use tools"
+  },
+  {
+    "para": "Finding 6 of Section 24.5 left a loose end: the model copies its own previous tool call, and prompts cannot cure it. Why? Because a base model is fundamentally a \"sentence-continuation champion\" - in the text it has seen, if the previous turn is a tool call, the next turn looks like another tool call with high probability, so inertia carries it into a copy. The cure is post-training - extra lessons for the model. The G1 family's iteration history is a post-training textbook in itself: G1i (2026-08) to G1k (2026-09) to the G1l preview - each generation was \"find the fault, build targeted data, retrain.\""
+  },
+  {
+    "para": "The core weapon of post-training is SFT (supervised fine-tuning; Chapter 15 covered LoRA as its budget version). Ordinary SFT teaches chatting; Agent SFT teaches working - and the unit of training data is not a sentence but a complete trajectory."
+  },
+  {
+    "table": {
+      "header": [
+        "The six beats of a trajectory",
+        "Example",
+        "Skill the model learns"
+      ],
+      "rows": [
+        [
+          "1. receive the task",
+          "User: What is hold_queue_depth for dispatch-router in staging?",
+          "understanding the task"
+        ],
+        [
+          "2. decide to call",
+          "Assistant: Let me check the config file. <tool>{\"name\":\"read_file\",\"arguments\":{\"path\":\"configs/dispatch-router.yaml\"}}</tool>",
+          "judging \"should I use a tool, and which one\""
+        ],
+        [
+          "3. receive the result",
+          "User (tool result): hold_queue_depth: 128",
+          "taking the evidence in"
+        ],
+        [
+          "4. wrap up and answer",
+          "Assistant: hold_queue_depth is 128.",
+          "\"once you have the result, answer; do not call again\""
+        ],
+        [
+          "5. answer directly",
+          "User: Hi!  Assistant: Hi, how can I help?",
+          "\"do not reach for tools when none is needed\""
+        ],
+        [
+          "6. bad samples (counter-examples)",
+          "repeating the same tool call, broken JSON brackets, calling again after getting the result",
+          "learning \"what not to do\" from the negative side"
+        ]
+      ]
+    }
+  },
+  {
+    "para": "Beats 1-3 teach \"calling\"; beat 4 specifically treats \"cannot stop\" (the copy-inertia); beat 5 treats \"itchy hands\"; beat 6 is the counter-example - research has repeatedly shown that good samples alone train slowly, while good samples plus labeled counter-examples (or preference-style contrasts) converge much faster. The jump from 40 to 49/60 in function calling measured in 24.5 came exactly from adding this kind of targeted data in the G1k era."
+  },
+  {
+    "para": "Where does the data come from? Human annotation of one trajectory takes minutes; annotating 50,000 is a fortune. The community playbook is threefold: (1) synthesis - let a strong model (a teacher) generate tasks and trajectories from templates, with rule-based scripts auto-grading and filtering (can the JSON be parsed, does the tool name actually exist, does the answer hit); (2) backflow - record real online failure cases (the full context at the moment of a copy-loop, say) and turn them into counter-examples or corrected samples - the most precious data of all; (3) distillation - start from open Agent trajectory datasets (ToolBench, AgentInstruct and the like) and rewrite them in your own format templates. Note the twist on Section 24.5's lesson: the format inside the training data must be exactly the format used at inference (\"Assistant:\" without the space, two User messages, the envelope wrapping tool calls) - a mismatch between training format and serving format means all that training was wasted effort."
+  },
+  {
+    "para": "Above SFT there is one more \"elective\": preference optimization (DPO/RLHF, a close cousin of Chapter 15's RLHF). Build two trajectories for the same task: one crisp (one tool call, then the wrap-up answer), one sloppy (repeated calls, or calling when a direct answer would do), then tell the model \"the first is better than the second.\" The model does not relearn knowledge; it only adjusts its choice tendencies - a small parameter change, ideal as the final polish after SFT. This layer is still early in the RWKV ecosystem, but it is on the roadmap of the official G1 release."
+  },
+  {
+    "h3": "24.7 Fit tuning: making the application and the model mesh"
+  },
+  {
+    "para": "Post-training changes the model - but the application side is not idle either. Real Agent experts treat \"model capability\" and \"application engineering\" as two adjustable gears that mesh with each other: when the model is not well-behaved, the application covers for it; where the application cannot cover, training data for the model is built in return. We call this craft fit tuning, and its goal is a perfect match between the model's output structure and the structure the application can consume."
+  },
+  {
+    "para": "Step one: turn \"feels nice to use\" into a score. Build a small exam (50-100 questions is enough to start), covering your product's real scenarios (weather, file reading, arithmetic...), and write an auto-grader. The grader watches three numbers: correctness (is the answer right), format validity (can the parser eat the output), and call efficiency (how many tool calls per task on average, any repeats). With these three numbers, \"fit\" turns from an adjective into a dashboard."
+  },
+  {
+    "table": {
+      "header": [
+        "The five-step loop",
+        "What to do",
+        "Common mistake"
+      ],
+      "rows": [
+        [
+          "1. freeze the exam",
+          "lock the question set and grader once written; do not edit mid-run",
+          "casually adding questions each run, invalidating all historical scores"
+        ],
+        [
+          "2. single-variable contrast",
+          "change exactly one thing (prompt / format / sampling / model version); run control and experiment 2-4 times each",
+          "swapping three configs at once - the score rises but you do not know whom to thank"
+        ],
+        [
+          "3. watch behavior distributions",
+          "two configs with similar correctness: compare call rate / format error rate / repeat rate - the correctly answered questions may be two entirely different batches",
+          "looking only at totals, picking a config that is \"good at chitchat, bad at work\" (the lesson of finding 5 in 24.5)"
+        ],
+        [
+          "4. fix from both sides",
+          "app side: parser tolerance, format envelopes, retry policy; model side: failed cases flow back as training data",
+          "dumping every problem onto prompts, tuning ever deeper into mysticism"
+        ],
+        [
+          "5. regression testing",
+          "run the full exam on every change; roll back on any regression (like the checkpoint rollback of Chapter 21)",
+          "fixing one bug and quietly breaking three"
+        ]
+      ]
+    }
+  },
+  {
+    "para": "Output-structure matching rests on three lines of defense - miss any one and it leaks: the prompt layer (a format specification plus the \"no tool needed\" exit tool - removing it raised repeated calls 30% in 24.5), the decoding layer (stop conditions watching both EOS and the \"User\" marker; low-temperature sampling; prefilling a legal prefix), and the parser layer (tolerant regex that strips commentary like \"Let me check first,\" repair of broken JSON, and one format-reminding retry on failure). The G1l benchmark's \"the parser must tolerate commentary plus call\" is a classic of the parser layer: one degree of application lenience buys one degree of model performance."
+  },
+  {
+    "table": {
+      "header": [
+        "Common symptom",
+        "Try the app side first (cheap)",
+        "Then the model side (pricey but curative)"
+      ],
+      "rows": [
+        [
+          "repeated calls to the same tool",
+          "a User reminder after the result; a hard cap on repeats (cut off at the 3rd)",
+          "trajectory counter-examples into the training set (cures copy-inertia)"
+        ],
+        [
+          "broken JSON brackets",
+          "parser-layer repair: append the closing brackets, re-format; one retry on failure",
+          "SFT data for format stability"
+        ],
+        [
+          "English questions answered in Chinese",
+          "check for the extra space after \"Assistant:\" (pitfall 1 of 24.5)",
+          "more mixed-language trajectory data"
+        ],
+        [
+          "never calls tools",
+          "state explicitly in the system prompt \"which questions must be verified\"",
+          "more positive beat-2 samples"
+        ],
+        [
+          "answers never come after results",
+          "the reminder as the last User message (finding 3 of 24.5)",
+          "more beat-4 wrap-up samples"
+        ]
+      ]
+    }
+  },
+  {
+    "para": "One-sentence summary: the benchmark is the compass; the app side is light cavalry (fast, cheap, redeployable at will); the model side is heavy infantry (slow, expensive, decisive). Let the cavalry scout ahead; where the cavalry cannot pass, report the coordinates to the infantry - failed cases flow back as training data - and the next model version is naturally stronger. RWKV-Agent's three jumps from G1i to G1l walked exactly this road; your project, big or small, runs the same loop."
+  },
+  {
     "quiz": [
       "【Multiple Choice】What is the most common cause of garbled output? A. Graphics card is too poor  B. Tokenizer does not match the model  C. Temperature set too high",
       "【Short Answer】Why does the paper specifically include a \"numerically stable version\" of the formula? Explain using fp16 overflow.",
       "【Short Answer】With one extra space after \"Assistant:\", why do English questions get answered in Chinese? Explain using the \"leading space\" knowledge from Chapter 19.",
-      "【Hands-on】Copy the four-step pitfall elimination method from 24.4 on a sticky note and post it next to your computer - run through it in order the next time a bug appears."
+      "【Hands-on】Copy the four-step pitfall elimination method from 24.4 on a sticky note and post it next to your computer - run through it in order the next time a bug appears.",
+      "【Multiple Choice】The most on-target cure for the model copying its previous tool call is? A. Add \"do not repeat\" to the prompt  B. Trajectory counter-examples into the training set  C. Crank the temperature to 1.0",
+      "【Short Answer】Why must the format inside Agent training data be exactly the format used at inference? Give an example using the space pitfall of 24.5.",
+      "【Hands-on】Design a 10-question mini exam for a small tool around you (weather lookup / notepad): write the questions, the grading rules, and the three dashboard metrics."
     ]
   },
   {
