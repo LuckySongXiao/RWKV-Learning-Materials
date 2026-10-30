@@ -162,7 +162,7 @@ const PART5 = [
     "DeepEmbed（深度嵌入）：把“隐藏状态”从薄薄一层加宽做深，给长程信息开“直达通道”。官方称它能实现类似 MoE（混合专家，多个专家分工答题）的优秀推理性能，却不占用额外显存——而且对混合架构特别友好。",
     "ROSA（推理时状态优化）：让模型在“思考的当下”还能继续调整自己的记忆状态。你读到第 13 章应该会心一笑——这正是 RWKV-7“先擦后写”精神的延续和升级。",
   ]},
-  { para: "社区仓库里已经出现了 RWKV-8 的实验代码（如 4bit 量化的 ROSA 演示模型），这代架构正在从图纸走向现实。" },
+  { para: "社区仓库里已经出现了 RWKV-8 的实验代码（如 4bit 量化的 ROSA 演示模型），这代架构正在从图纸走向现实。最激进的抢跑是 ConsciousNode 的 Simulacra（2026，第 25.4 节 HTMLNLM 的同门）——它自称“RWKV-v8 的 clean break”：把 WKV 整个换掉，用 ROSA 当唯一的序列机制，号称已在浏览器里可运行。官方图纸和社区抢跑互相追赶，正是开源生态的活力所在。" },
   { h3: "17.4 RPU：为 RWKV 量身打造的芯片" },
   { para: "比第八代更值得期待的，是一个“从软件走进硬件”的故事。RWKV 基金会与合作方正在推进 RPU（Recurrent Processing Unit，循环处理单元）计划——为 RWKV 这类线性循环架构量身打造的专用芯片。这不是空想，而是有备而来：" },
   { bullet: [
@@ -196,6 +196,7 @@ const APPENDIX = [
     ["7", "A Survey of RWKV", "2412.14847", "综述", "RWKV 又一篇综述：语言任务性能、生态、与 Mamba 等对比"],
   ]}},
   { para: "补充资料（社区实测文档）：RWKV-Agent 项目的《基于 G1l 预览版：RWKV Agent 提示词、工具格式与采样分析》（No.22，2026-10-24，github.com/No-22-Github/RWKV-Agent · docs/evaluations）——568 题考卷 × 17 组对照实验，把 Agent 场景的提示词格式与采样参数做成科学；第 24.5 节的四个暗坑全部来自它。" },
+  { para: "补充资料（社区项目）：HTMLNLM（ConsciousNode SoftWorks，2026.10，github.com/ConsciousNode/HTMLNLM）——单 HTML 文件零依赖的 RWKV-v7 完整训练＋推理运行时（BitNet 三值化、T-MAC 查表、OOMB 常数内存反传、Muon 优化器、GRPO）；可直载官方 Goose x070 权重与 GGUF；同门 Simulacra 是社区对 RWKV-v8 的抢跑实现。第 25.4 节的完整介绍来自它。" },
   { h2: "附录 B：术语表（按拼音排序）" },
   { table: { header: ["术语", "本书译法与解释"], rows: [
     ["Transformer", "变换器（不是“变压器/变形金刚”）：注意力架构，ChatGPT 的骨架"],

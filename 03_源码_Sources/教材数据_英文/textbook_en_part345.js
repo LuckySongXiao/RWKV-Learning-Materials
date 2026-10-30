@@ -476,7 +476,7 @@ const PART5 = [
     ]
   },
   {
-    "para": "Experimental code for RWKV-8 has already appeared in community repositories (such as the 4-bit quantized ROSA demo model), and this generation's architecture is moving from blueprint to reality."
+    "para": "Experimental code for RWKV-8 has already appeared in community repositories (such as the 4-bit quantized ROSA demo model); this generation is moving from blueprint to reality. The boldest sprint is ConsciousNode's Simulacra (2026, a sibling of HTMLNLM in Section 25.4) - it calls itself \"the RWKV-v8 clean break\": WKV is replaced wholesale, with ROSA as the only sequence mechanism, and it is claimed to be runnable in the browser already. The official blueprint and the community sprint chasing each other is exactly the vitality of an open-source ecosystem."
   },
   {
     "h3": "17.4 RPU: A Chip Custom-Made for RWKV"
@@ -587,6 +587,9 @@ const APPENDIX = [
   },
   {
     "para": "Supplementary material (community benchmark): \"G1l Preview: RWKV Agent Prompt, Tool Format and Sampling Analysis\" by No.22, 2026-10-24, github.com/No-22-Github/RWKV-Agent (docs/evaluations) - a 568-question exam with 17 controlled experiments that turned Agent-scenario prompt format and sampling into a science; the four pitfalls in Section 24.5 all come from it."
+  },
+  {
+    "para": "Supplementary material (community project): HTMLNLM (ConsciousNode SoftWorks, Oct 2026, github.com/ConsciousNode/HTMLNLM) - a single zero-dependency HTML file implementing complete RWKV-v7 training plus inference (BitNet ternary weights, T-MAC lookup, OOMB constant-memory backprop, Muon optimizer, GRPO); loads official Goose x070 weights and GGUF directly; its sibling Simulacra is the community's sprint toward RWKV-v8. The full introduction in Section 25.4 is based on it."
   },
   {
     "h2": "Appendix B: Glossary (Sorted by Pinyin)"

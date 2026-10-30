@@ -331,32 +331,32 @@ const PART7 = [
       ],
       "rows": [
         [
-          "low-end PC (no discrete GPU)",
+          "Browser (any computer)",
+          "RWKV WebGPU Demo / WebLLM / HTMLNLM",
+          "no download, run RWKV-7 locally in a web page: chat, solitaire, composing; go further with HTMLNLM and train from scratch (25.4)"
+        ],
+        [
+          "Windows / Mac / Linux desktop",
+          "RWKV Runner (by community member josStorer, only 8 MB)",
+          "works out of the box: chat, continuation, composing, MIDI input; one-click LoRA fine-tuning"
+        ],
+        [
+          "Phone / tablet",
+          "RWKV APP (Flutter cross-platform)",
+          "fully local and offline - a large model in your pocket"
+        ],
+        [
+          "Low-end computers (no discrete GPU)",
           "rwkv.cpp (C++ quantized inference)",
           "quantized models run smoothly even on CPU"
         ],
         [
-          "gaming laptop / workstation",
-          "ai00_server (local inference service)",
-          "runs directly on the GPU, fast; build your own local chat service"
-        ],
-        [
-          "edge modules (farm machinery, IoT)",
-          "Quectel high-compute modules (shown at WAIC 2025)",
-          "putting RWKV into tractors, cameras, sensors"
-        ],
-        [
-          "low-end computers (no discrete GPU)",
-          "rwkv.cpp (C++ quantized inference)",
-          "quantized models run smoothly even on CPU"
-        ],
-        [
-          "home gaming laptops / workstations",
+          "Home gaming laptops / workstations",
           "ai00_server (local inference service)",
           "runs straight on the GPU, fast; build your own local chat service"
         ],
         [
-          "edge modules (farm machinery, IoT)",
+          "Edge modules (farm machinery, IoT)",
           "Quectel high-compute modules (shown at WAIC 2025)",
           "put RWKV into tractors, cameras, and sensors"
         ]
@@ -377,14 +377,70 @@ const PART7 = [
       "First stop (5 minutes): Open WebGPU Demo in browser—zero installation, first see what a 'model in the browser' looks like.",
       "Second stop (half hour): Download RWKV Runner, automatically download models, start local chatting.",
       "Third stop (an afternoon): Use ai00 or rwkv.cpp to run the same model, compare speed differences, understand the value of 'inference engines'.",
-      "Fourth stop (a weekend): Follow Chapters 20-21 to train your own mini model, then load it with your own Runner—complete end-to-end loop."
+      "Fourth stop (a weekend): Follow Chapters 20-21 to train your own mini model, then load it with your own Runner—complete end-to-end loop.",
+      "Fifth stop (if you refuse to be impressed): open HTMLNLM (25.4) - click a few buttons in the browser and watch an RWKV-v7 learn to talk from zero, without even installing Python."
     ]
+  },
+  {
+    "h3": "25.4 HTMLNLM: one HTML file = one training factory (Oct 2026)"
+  },
+  {
+    "para": "In October 2026, the ConsciousNode team (Kham, Kehai, and Ed) released a project of maximum defiance: HTMLNLM. It packs complete RWKV-v7 training plus inference into a single HTML file - no server, no Python, no CUDA, no install; open it in a browser and you can train a model from scratch. Their slogan is the \"xinu principle: the browser is bare metal.\" The whole model-building pipeline this book teaches across Chapters 18-23 (data to tokenizer to training to inference) - one file walks it all."
+  },
+  {
+    "table": {
+      "header": [
+        "Component",
+        "What it does",
+        "In middle-school words"
+      ],
+      "rows": [
+        [
+          "RWKV-v7 backbone",
+          "linear-time recurrent architecture, O(1) inference memory",
+          "the very ledger you met in Chapters 12-14"
+        ],
+        [
+          "BitNet b1.58",
+          "ternary weights {-1, 0, +1}, with a T-MAC lookup-table microkernel replacing matrix multiplication",
+          "swaps multiplication for \"looking it up in a dictionary\": weights are only -1/0/+1, and a matrix multiply becomes consulting a small table"
+        ],
+        [
+          "OOMB backprop",
+          "chunk-recurrent backprop with activation recomputation, constant memory at any sequence length",
+          "do not keep every page of scratch paper - recompute whichever page you need; the memory never grows no matter how long the sequence"
+        ],
+        [
+          "MuonOptimizer",
+          "five Newton-Schulz orthogonalization passes keeping weight matrices \"healthy\"",
+          "a set of anti-drift gymnastics for gradient updates (a distant cousin of Chapter 21's warmup)"
+        ],
+        [
+          "GRPO alignment",
+          "critic-free reinforcement learning alignment, z-score normalized advantages plus KL constraint",
+          "a lightweight cousin of Chapter 15's RLHF: no need to hire a second model as judge"
+        ],
+        [
+          "BPE tokenizer",
+          "compiled into a WebWorker so the UI never freezes",
+          "the Chapter 19 BPE running in a \"backstage worker\" - you can keep clicking the page while it trains"
+        ]
+      ]
+    }
+  },
+  {
+    "para": "Using it is as easy as ordering food: open HTMLNLM.html, set the model size in ARCHITECTURE (recommended start: vocab 2048, hidden 256, 4 layers, chunk 128), drop in a .txt corpus, click COMPILE BPE, ALLOCATE VM, switch to PRE-TRAIN, START LOOP - then watch it learn. Better still, it does not only eat self-trained models: the official RWKV-7 Goose (x070) .pth weights, downloaded straight from BlinkDL's releases, can be dragged in directly (no PyTorch, no conversion); .safetensors and 13 llama.cpp quantization formats (Q4_K_M, Q8_0, and friends) are all supported. Measured numbers: the 0.1B (about 190M parameters) occupies about 760 MB in a browser tab and runs at about 360 ms/token on a single cloud CPU thread; the 0.4B at Q4_K_M takes about 752 MB at 767 ms/token - less than the 0.1B's original .pth. The project even guards its food: a damaged (all-zero) weight file is refused at load with a message to re-download."
+  },
+  {
+    "para": "The team's product line is itself a map of the RWKV frontier: on top of HTMLNLM (the stable text runtime) grew Evangelion (omnimodal: vision/audio/spatial plus SheafMemory), OmniVocal (browser TTS), RAG-Time (browser RAG), EvaROSA (neuro-symbolic \"inner monologue\"), Brymar College (a teaching edition that LoRA-fine-tunes a real RWKV-7), and the Pip Suite (a multi-model conversation workshop). The one most worth remembering is Simulacra - it calls itself \"the RWKV-v8 clean break\": ROSA entirely replaces WKV as the sequence mechanism. Section 17.3 said RWKV-8 was still on the drawing board? Someone in the community already sprinted the blueprint into something runnable. For this book's readers, HTMLNLM is the cheapest full-pipeline laboratory: to watch the loss curve fall with your own eyes, or to see what Chapter 21 looks like inside a browser, go to consciousnode.github.io/HTMLNLM and click."
   },
   {
     "quiz": [
       "【Multiple Choice】Which type of device best demonstrates RWKV's edge advantages over Transformers? A. Cloud with thousands of GPUs  B. Memory-constrained mobile/edge devices  C. Quantum computer",
       "【Short Answer】Explain using 'constant memory + no KV cache': Why don't browser tabs running RWKV become increasingly laggy during conversations?",
-      "【Hands-on】Complete the first and second stops of section 25.3, take a screenshot for each, and write three sentences of experience notes (speed/quality/surprises or shortcomings)."
+      "【Hands-on】Complete the first and second stops of section 25.3, take a screenshot for each, and write three sentences of experience notes (speed/quality/surprises or shortcomings).",
+      "【Short Answer】HTMLNLM replaces matrix multiplication with \"ternary weights plus a lookup table.\" Using the Chapter 22 quantization mindset, explain: why does storing weights as only {-1, 0, +1} save so much memory and compute?",
+      "【Hands-on】Open HTMLNLM, feed it the Appendix E mini-corpus (or 100 lines of your own Chinese), run COMPILE BPE then PRE-TRAIN, screenshot the loss curve, and mark the loss at step 100 and step 1000."
     ]
   },
   {
