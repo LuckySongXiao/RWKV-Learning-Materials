@@ -13,7 +13,7 @@ const PART3 = [
     "para": "RWKV-4's two ledgers (a, b) are both \"columns of numbers\" (vectors). Eagle upgrades memory to \"a table\" (matrix). The new ledger formula (cyclic form of paper's equation 6, equations 8-9):"
   },
   {
-    "formula": "卡片盒 sₜ = diag(w)·sₜ₋₁ + kₜ ⊗ vₜ   （⊗ 读“外积”，表示 k 和 v 做交叉乘法填满表格）"
+    "formula": "Card box sₜ = diag(w)·sₜ₋₁ + kₜ ⊗ vₜ   (⊗ is read as “outer product”: k and v cross-multiply to fill the table)"
   },
   {
     "para": "In plain terms: the entire old card box gets discounted by w; when a new word comes, its label k and content v are \"cross-multiplied\" once to generate a new card, which is added to the box. When querying memory, use the current label kₜ to \"scratch\" the box (matrix multiplication), and related content will be selected."
@@ -105,7 +105,7 @@ const PART3 = [
     "para": "Goal: Experience matrix state with 30 lines of Python: storing, discounting, and retrieving. Tools: A computer with Python and numpy installed (pip install numpy). Create a new file matrix_memory.py:"
   },
   {
-    "code": "import numpy as np\n\nD = 4                          # 维度\nbox = np.zeros((D, D))         # 空卡片盒（矩阵状态）\nw = 0.5                        # 折扣率（示意图先写死）\n\ndef store(box, k, v, w):\n    # 记账：旧盒打折 + 新卡片（外积）入盒\n    return w * box + np.outer(k, v)\n\ndef retrieve(box, q):\n    # 勾账：拿查询标签 q 去盒子上划一下\n    return q @ box\n\n# 存三个词（k 是标签，v 是内容）\nwords = [([1,0,0,0], [10,0,0,0]),   # 词1：标签频道0，内容在频道0\n         ([0,1,0,0], [0,20,0,0]),   # 词2：标签频道1，内容在频道1\n         ([1,0,0,0], [8,0,0,0])]    # 词3：又用标签频道0（新内容）\n\nfor i,(k,v) in enumerate(words, start=1):\n    box = store(box, np.array(k,float), np.array(v,float), w)\n    print(f\"存第{i}个词后, 盒子的左上角4x4:\\n{box[:4,:4]}\")\n\n# 用标签“频道0”查询\nq = np.array([1,0,0,0], float)\nprint(\"查询标签[1,0,0,0] 勾出内容:\", retrieve(box, q))"
+    "code": "import numpy as np\n\nD = 4                          # dimensions\nbox = np.zeros((D, D))         # empty card box (matrix state)\nw = 0.5                        # discount rate (hard-coded for this illustration)\n\ndef store(box, k, v, w):\n    # record: discount the old box + add the new card (outer product)\n    return w * box + np.outer(k, v)\n\ndef retrieve(box, q):\n    # query: scratch the box with the query label q\n    return q @ box\n\n# store three words (k is the label, v is the content)\nwords = [([1,0,0,0], [10,0,0,0]),   # word 1: label on channel 0, content in channel 0\n         ([0,1,0,0], [0,20,0,0]),   # word 2: label on channel 1, content in channel 1\n         ([1,0,0,0], [8,0,0,0])]    # word 3: label channel 0 again (new content)\n\nfor i,(k,v) in enumerate(words, start=1):\n    box = store(box, np.array(k,float), np.array(v,float), w)\n    print(f\"After storing word {i}, top-left 4x4 of the box:\\n{box[:4,:4]}\")\n\n# query with the label \"channel 0\"\nq = np.array([1,0,0,0], float)\nprint(\"Querying label [1,0,0,0] retrieves:\", retrieve(box, q))"
   },
   {
     "para": "After running, pay attention to: the query mainly retrieves content from channel 0 (around 5 signal, which is 10 halved plus 8), while the 20 in channel 1 can barely be retrieved (discounted twice to only 5, and in the wrong direction to retrieve). Try changing w to 0.9 and run again: is more memory retained in channel 1? Now change the label for word 3 to [0,0,1,0], see if it's stored in the box without interference—this is the \"partitioning capability of matrix memory\"."
@@ -143,7 +143,7 @@ const PART4 = [
     "para": "The original Delta rule (proposed by Schlag et al. 2021) has the update mantra: \"erase before writing\". Let card box be S, current label k, new content v:"
   },
   {
-    "formula": "S ← S − (S 勾 k) ⊗ k + k ⊗ v   （先把盒里 k 标签对应的旧内容擦掉，再写入新内容 v）"
+    "formula": "S ← S − (S queried by k) ⊗ k + k ⊗ v   (first erase the old content matching label k in the box, then write in the new content v)"
   },
   {
     "example": "The box already has [apple→red] (k=[1,0], corresponding to v=[10,0]). Now comes [apple→green] (k=[1,0], v=[0,15]).\nStep 1 [Erase]: Calculate that the content at the k label position in the box is [10,0], subtract it using k⊗[10,0]—the old red answer for apple is erased.\nStep 2 [Write]: Write in k⊗[0,15]—the new green answer for apple.\nResult: The box cleanly becomes [apple→green], not a red-green mix. This is \"learning\" rather than \"accumulation\"."
@@ -299,7 +299,7 @@ const PART4 = [
     "para": "Goal: Visually compare the performance of \"accept everything\" (additive memory) vs. \"write after erase\" (Delta memory) during knowledge updates. Tools: Python + numpy. File delta_rule.py:"
   },
   {
-    "code": "import numpy as np\n\nS_add = np.zeros((2, 2))     # 盒A：只会叠加（RWKV-4/5 式）\nS_delta = np.zeros((2, 2))   # 盒B：先擦后写（RWKV-7 式）\n\ndef norm(k):                # RWKV-7 的 κ̂：标签归一化（方向不变，长度变1）\n    return k / np.linalg.norm(k)\n\ndef delta_update(S, k, v, a=1.0):\n    kk = norm(k)                          # 擦除定位器\n    old = S @ kk                           # 勾出旧内容\n    S = S - a * np.outer(kk, old)          # 第一步【擦】\n    S = S + np.outer(kk, v * np.linalg.norm(k))  # 第二步【写】\n    return S\n\nk = np.array([1.0, 0.0])     # 标签：只认“苹果”这个频道\n\ndef query(S, q):\n    return S @ norm(q)\n\n# 场景：苹果的颜色先说红，后改口绿\nupdates = [np.array([10.0, 0.0]),   # 苹果→红\n           np.array([10.0, 0.0]),   # （重复强调红）\n           np.array([0.0, 10.0])]   # 改口：苹果→绿\n\nfor i, v in enumerate(updates, start=1):\n    S_add = S_add + np.outer(k, v)                 # 盒A：直接叠\n    S_delta = delta_update(S_delta, k, v)          # 盒B：先擦后写\n    print(f\"第{i}次写入(内容{v})：\")\n    print(f\"  叠加盒查询苹果 → {query(S_add, k)}\")\n    print(f\"  Delta盒查询苹果 → {query(S_delta, k)}\")"
+    "code": "import numpy as np\n\nS_add = np.zeros((2, 2))     # Box A: additive only (RWKV-4/5 style)\nS_delta = np.zeros((2, 2))   # Box B: erase then write (RWKV-7 style)\n\ndef norm(k):                # RWKV-7's κ̂: normalize the label (direction unchanged, length becomes 1)\n    return k / np.linalg.norm(k)\n\ndef delta_update(S, k, v, a=1.0):\n    kk = norm(k)                          # erase locator\n    old = S @ kk                          # retrieve the old content\n    S = S - a * np.outer(kk, old)          # Step 1 [erase]\n    S = S + np.outer(kk, v * np.linalg.norm(k))  # Step 2 [write]\n    return S\n\nk = np.array([1.0, 0.0])     # label: only recognizes the \"apple\" channel\n\ndef query(S, q):\n    return S @ norm(q)\n\n# scenario: the apple's color is first red, then changed to green\nupdates = [np.array([10.0, 0.0]),   # apple -> red\n           np.array([10.0, 0.0]),   # (repeated emphasis on red)\n           np.array([0.0, 10.0])]   # changed answer: apple -> green\n\nfor i, v in enumerate(updates, start=1):\n    S_add = S_add + np.outer(k, v)                 # Box A: just add\n    S_delta = delta_update(S_delta, k, v)          # Box B: erase then write\n    print(f\"Write #{i} (content {v}):\")\n    print(f\"  Additive box query for apple -> {query(S_add, k)}\")\n    print(f\"  Delta box query for apple -> {query(S_delta, k)}\")"
   },
   {
     "para": "Run it and observe: after the first two writes, both boxes answer the label query with the same value (10). After the third write, the additive box still returns 10 (the old red entry is still in there), while the Delta box returns a clean 10 on a different channel (green) - the old answer has been replaced. This is the minimal demonstration of 'learning in context'. Thinking questions: (1) change a from 1.0 to 0.5 (a half-strength eraser) in delta_update and watch the old/new mixing ratio; (2) write two tokens with different labels and verify they do not interfere with each other."
@@ -324,13 +324,13 @@ const PART5 = [
     "para": "Previously we played with \"skeleton code,\" now let's run a real model. The community has packaged inference into a pip package (pip is Python's app store). Execute in command line in order:"
   },
   {
-    "code": "# 第 1 步：装包（rwkv 官方推理包）\npip install rwkv\n\n# 第 2 步：装依赖\npip install torch --index-url https://download.pytorch.org/whl/cpu\n# （CPU 版就够；有显卡的同学去 pytorch.org 选 CUDA 版）\n\n# 第 3 步：下载一个 0.1B 的小模型（约 400MB，RWKV-4 世界语系小模型）\n# 浏览器打开 https://huggingface.co/BlinkDL/rwkv-4-world-0.1b\n# 下载 RWKV-4-World-0.1B-v1-20230520-ctx4096.pth 放到当前文件夹"
+    "code": "# Step 1: install the package (the official rwkv inference package)\npip install rwkv\n\n# Step 2: install dependencies\npip install torch --index-url https://download.pytorch.org/whl/cpu\n# (the CPU version is enough; if you have a GPU, pick the CUDA version at pytorch.org)\n\n# Step 3: download a small 0.1B model (about 400MB, an RWKV-4 World-language model)\n# Open https://huggingface.co/BlinkDL/rwkv-4-world-0.1b in your browser\n# Download RWKV-4-World-0.1B-v1-20230520-ctx4096.pth into the current folder"
   },
   {
     "h3": "15.2 Making RWKV Speak with Just Ten Lines of Code"
   },
   {
-    "code": "from rwkv.model import RWKV\nfrom rwkv.utils import PIPELINE\n\n# 加载模型和分词器\nmodel = RWKV(model=\"RWKV-4-World-0.1B-v1-20230520-ctx4096\", strategy=\"cpu fp32\")\npipe = PIPELINE(model, \"rwkv_vocab_v20230424\")\n\n# 开始生成\nout = pipe.generate(\n    \"小白兔喜欢吃的蔬菜是\",\",   # 提示词\n    token_count=50,               # 生成 50 个 token\n    temperature=1.0,              # 温度：越大越放飞\n    top_p=0.7,                    # 只从可能性前 70% 里挑\n)\nprint(out)"
+    "code": "from rwkv.model import RWKV\nfrom rwkv.utils import PIPELINE\n\n# load the model and tokenizer\nmodel = RWKV(model=\"RWKV-4-World-0.1B-v1-20230520-ctx4096\", strategy=\"cpu fp32\")\npipe = PIPELINE(model, \"rwkv_vocab_v20230424\")\n\n# start generating\nout = pipe.generate(\n    \"The little white rabbit's favorite vegetable is\",   # prompt\n    token_count=50,               # generate 50 tokens\n    temperature=1.0,              # temperature: higher = more free-spirited\n    top_p=0.7,                    # only sample from the top 70% of possibilities\n)\nprint(out)"
   },
   {
     "para": "The first run will download the model file (about 400MB), and subsequent runs will load the local file. Pay attention to the speed during generation: 0.1B CPU inference generates about a dozen words per second—that's the speed of \"little notebook\" mode. The generation quality depends on the model size; 0.1B is just a toy. Switching to RWKV-7-World-0.4B (about 1.6GB file, write the corresponding name in the model parameter) will make you feel noticeably smarter. Change the temperature to 0.2 and 1.5 and run each once to experience the difference between \"conservative\" and \"unrestrained.\""
@@ -383,10 +383,10 @@ const PART5 = [
     ]
   },
   {
-    "h2": "Chapter 16 The RWKV Family: A Map of 266 Papers"
+    "h2": "Chapter 16 The RWKV Family: A Map of 273 Papers"
   },
   {
-    "para": "The \"Ecosystem → Papers\" section on the rwkv.cn official website has collected 266 RWKV-related papers (as of October 2026). Among them, architecture research papers are in the minority: besides the three main versions analyzed in this book (RWKV-4, RWKV-5/6, RWKV-7), there are also hybrid architecture RWKV-X, multimodal framework ModRWKV, and 2 review papers—totaling 7. The remaining 259 papers are from engineers worldwide using RWKV to solve practical problems—seeing doctors, checking road conditions, listening to music, compressing files—application papers. Classification statistics:"
+    "para": "The \"Ecosystem → Papers\" section on the rwkv.cn official website has collected 273 RWKV-related papers (as of November 2026 (266 at this book's first edition - 7 more in about a month; the ecosystem keeps growing)). Among them, architecture research papers are in the minority: besides the three main versions analyzed in this book (RWKV-4, RWKV-5/6, RWKV-7), there are also hybrid architecture RWKV-X, multimodal framework ModRWKV, and 2 review papers—totaling 7. The remaining 259 papers are from engineers worldwide using RWKV to solve practical problems—seeing doctors, checking road conditions, listening to music, compressing files—application papers. Classification statistics:"
   },
   {
     "table": {
@@ -433,7 +433,7 @@ const PART5 = [
     "h3": "16.1 Why Everyone Loves Using RWKV for Vision Tasks"
   },
   {
-    "para": "Images can be sliced into 'patch sequences' (like cutting a comic into vertical strips), videos are naturally time series, and medical CT scans are sequences of hundreds of slices—these 'long sequence' tasks perfectly align with RWKV's strengths: linear complexity + state memory. For example, the paper 'TriAIF-RWKV' uses Dilated-RWKV to analyze CT perfusion time curves, and 'CROWNFuse' uses RWKV states to connect infrared and visible light photos. Appendix C provides a complete list of representative papers in all categories (see the accompanying attachment rwkv_paper_list.xlsx for the full table of 266 papers)."
+    "para": "Images can be sliced into 'patch sequences' (like cutting a comic into vertical strips), videos are naturally time series, and medical CT scans are sequences of hundreds of slices—these 'long sequence' tasks perfectly align with RWKV's strengths: linear complexity + state memory. For example, the paper 'TriAIF-RWKV' uses Dilated-RWKV to analyze CT perfusion time curves, and 'CROWNFuse' uses RWKV states to connect infrared and visible light photos. Appendix C provides a complete list of representative papers in all categories (see the accompanying attachment rwkv_paper_list.xlsx for the full table of 273 papers)."
   },
   {
     "h3": "16.2 How to Read an Application Paper"
@@ -443,7 +443,7 @@ const PART5 = [
   },
   {
     "quiz": [
-      "【Multiple Choice】Which category has the largest proportion among the 266 papers? A. Language B. Image C. Audio",
+      "【Multiple Choice】Which category has the largest proportion among the 273 papers? A. Language B. Image C. Audio",
       "【Short Answer】Why are vision tasks naturally suitable for RWKV? (Hint: patch sequences/slice sequences)",
       "【Hands-on】Use the 'Four Question Method' to analyze any paper from Appendix C: Task? Position? Advantages? How much did it win? Write down your answers."
     ]
@@ -482,7 +482,7 @@ const PART5 = [
     "h3": "17.4 RPU: A Chip Custom-Made for RWKV"
   },
   {
-    "para": "More anticipated than the eighth generation is a story of 'moving from software to hardware.' The RWKV Foundation and its partners are advancing the RPU (Recurrent Processing Unit) project—a dedicated chip specifically designed for linear recurrent architectures like RWKV. This isn't just an empty idea; it's well-prepared:"
+    "para": "More anticipated than the eighth generation is a story of 'moving from software to hardware.' The RWKV Foundation and its partners are advancing the RPU (Recurrent Processing Unit) project—a dedicated chip specifically designed for linear recurrent architectures like RWKV. In October 2026 the official team released the first RPU Demo (confirmed by this book's weekly-check system from BlinkDL's updates) - it has moved from slides to a live hardware demonstration. This isn't just an empty idea; it's well-prepared:"
   },
   {
     "bullet": [
@@ -499,7 +499,7 @@ const PART5 = [
     "h3": "17.5 Written for You in the Future"
   },
   {
-    "para": "From one person's open-source experiment in 2021 to a global ecosystem of 266 papers, and soon to be born dedicated chips—RWKV has proven in five years that a different path from Transformer can also lead to success. Each step of its evolution is simple and clear: making the ledger easier to remember (vector→matrix), making the discount smarter (fixed→data-driven), making the erasure and writing cleaner (superposition→erase before write)."
+    "para": "From one person's open-source experiment in 2021 to a global ecosystem of 273 papers, and soon to be born dedicated chips—RWKV has proven in five years that a different path from Transformer can also lead to success. Each step of its evolution is simple and clear: making the ledger easier to remember (vector→matrix), making the discount smarter (fixed→data-driven), making the erasure and writing cleaner (superposition→erase before write)."
   },
   {
     "para": "Perhaps a few years from now, the device in your pocket is running an RPU chip, inside which RWKV-9 or RWKV-10 is using the 'accounting magic' you learned in this book to understand the world. When that time comes, you'll discover: so-called future stars are simply those who have persisted in taking simple principles to the extreme—remembering new things, forgetting old things, and learning from mistakes. And this is the most fascinating aspect of science."
@@ -508,7 +508,7 @@ const PART5 = [
     "h3": "17.6 Closing Remarks"
   },
   {
-    "para": "Looking back at the book: starting with 'completing the conversation,' you learned about forgetful RNNs and the 'passing notes' Transformer; you unpacked RWKV-4's two sets of accounts, upgraded to matrix card boxes (Eagle/Finch) and the 'erase before writing' Delta rule (RWKV-7); and finally ran real models and explored the ecosystem of 266 papers. You now have all the components needed to understand those original papers—find them on arXiv, dissect them using the four-question method. This is your graduation assignment. The next page of AI might just be written in your future code."
+    "para": "Looking back at the book: starting with 'completing the conversation,' you learned about forgetful RNNs and the 'passing notes' Transformer; you unpacked RWKV-4's two sets of accounts, upgraded to matrix card boxes (Eagle/Finch) and the 'erase before writing' Delta rule (RWKV-7); and finally ran real models and explored the ecosystem of 273 papers. You now have all the components needed to understand those original papers—find them on arXiv, dissect them using the four-question method. This is your graduation assignment. The next page of AI might just be written in your future code."
   },
   {
     "quiz": [
@@ -677,10 +677,10 @@ const APPENDIX = [
     }
   },
   {
-    "h2": "Appendix C: Classification index of 266 ecosystem papers (representatives from each category)"
+    "h2": "Appendix C: Classification index of 273 ecosystem papers (representatives from each category)"
   },
   {
-    "para": "See the accompanying attachment rwkv_paper_list.xlsx for the complete list of 266 papers (including dates, journals, abstracts, and links). Below, 5 representative papers from each category are selected for the 'Four Questions' practice method:"
+    "para": "See the accompanying attachment rwkv_paper_list.xlsx for the complete list of 273 papers (including dates, journals, abstracts, and links). Below, 5 representative papers from each category are selected for the 'Four Questions' practice method:"
   },
   {
     "table": {

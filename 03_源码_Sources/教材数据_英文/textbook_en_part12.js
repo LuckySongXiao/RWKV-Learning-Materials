@@ -168,7 +168,7 @@ const PART1 = [
     "para": "RWKV's name comes from the first letters of its four most important internal parameters: R (Receptance), W (Weight), K (Key), and V (Value). It was initiated by Peng Bo (online name BlinkDL) in the open-source community in 2021 and has been continuously developed by volunteers worldwide, evolving from RWKV-1 to today's RWKV-8. Its design goal can be summarized in one sentence:"
   },
   {
-    "formula": "训练时像 Transformer 一样“全班看黑板”（并行，快），推理时像 RNN 一样“带小本本”（只记状态，省）。"
+    "formula": "Training: like a Transformer, “the whole class watches the blackboard” (parallel, fast). Inference: like an RNN, “carrying a little notebook” (only the state is kept, frugal)."
   },
   {
     "para": "Why is this \"dual nature\" so valuable? Let's break down the costs separately."
@@ -305,16 +305,16 @@ const PART2 = [
     "para": "Time mixing is RWKV's most important invention. Its task: after reading a sentence, make a judgment on \"what should be output now\"—and this judgment must draw from the weighted history of the entire sentence. RWKV-4 paper equations 19-22 write it as two books of accounts, so let's directly look at the account books."
   },
   {
-    "formula": "第 19 式（初始）：a₀ = 0，b₀ = 0 （两本账都从空账开始）"
+    "formula": "Equation 19 (initialize): a₀ = 0, b₀ = 0 (both ledgers start from empty books)"
   },
   {
-    "formula": "第 20 式（读账）：wkv_t = ( aₜ₋₁ + e^(u+kₜ)·vₜ ) ÷ ( bₜ₋₁ + e^(kₜ) )"
+    "formula": "Equation 20 (read the ledger): wkv_t = ( aₜ₋₁ + e^(u+kₜ)·vₜ ) ÷ ( bₜ₋₁ + e^(kₜ) )"
   },
   {
-    "formula": "第 21 式（记分子账）：aₜ = e^(−w)·aₜ₋₁ + e^(kₜ)·vₜ"
+    "formula": "Equation 21 (update the numerator ledger): aₜ = e^(−w)·aₜ₋₁ + e^(kₜ)·vₜ"
   },
   {
-    "formula": "第 22 式（记分母账）：bₜ = e^(−w)·bₜ₋₁ + e^(kₜ)"
+    "formula": "Equation 22 (update the denominator ledger): bₜ = e^(−w)·bₜ₋₁ + e^(kₜ)"
   },
   {
     "para": "Looks scary? Actually, the four lines only tell three things: old accounts get discounted, new accounts are added, and output is a weighted average. Let's translate each symbol into plain language:"
@@ -412,7 +412,7 @@ const PART2 = [
     "para": "Time mixing handles \"remembering the past\", channel mixing handles \"deep processing the present\". It's like a sorting center: goods (word vectors) come in, first get recombined and repackaged in the warehouse (large matrix transformation), then go through \"unboxing inspection\" (ReLU² activation—zero out negatives, square positives to make important items stand out), and finally the R valve decides how much to let through."
   },
   {
-    "formula": "通道混合：rₜ = σ(R̃ₜ)（阀门）；kₜ = exp(K̃ₜ)（打包重量）；输出 = rₜ × W × ReLU²(kₜ)（放行的货）"
+    "formula": "Channel mixing: rₜ = σ(R̃ₜ) (the valve); kₜ = exp(K̃ₜ) (the packing weight); output = rₜ × W × ReLU²(kₜ) (the released goods)"
   },
   {
     "para": "You don't need to remember the formulas, just remember the division of labor: time mixing handles \"memory\", channel mixing handles \"processing\". One RWKV layer = time mixing room + channel mixing room, connected in series. Real models have dozens of layers, information is refined layer by layer, becoming more abstract as you go higher."
@@ -431,7 +431,7 @@ const PART2 = [
     "para": "RWKV-4 also has a clever trick: before each word enters time mixing, it first \"mixes blood\" with the previous word. The formula is extremely simple—"
   },
   {
-    "formula": "混搭ₜ = xₜ₋₁ + μ · (xₜ − xₜ₋₁)  （μ 是每个通道自己学的比例，0 到 1）"
+    "formula": "Mixₜ = xₜ₋₁ + μ · (xₜ − xₜ₋₁)  (μ is the ratio each channel learns by itself, between 0 and 1)"
   },
   {
     "example": "This is like mixing juice: 20% of the leftover from the last cup mixed with 80% new (when μ=0.8). Why mix? Because if you only look at the current word for \"each word's label and content\", the information is too thin; mix in some of the previous word, and the model can capture \"cross-word combinations\" (like \"not\" and \"good\" together form \"not good\"). Mathematically, this is equivalent to a 1D convolution of length 2, with almost zero cost but great benefits."
@@ -547,7 +547,7 @@ const PART2 = [
     "para": "Goal: Turn the Chapter 6 ledger into real code, run it, and see the numbers. Tools: Any computer with Python 3 installed (you can also use apps like \"Pyto\" or \"QPython\" on a phone). Create a new file rwkv_core.py and copy the code below line by line (the comments are explanations for you):"
   },
   {
-    "code": "import math\n\nw = 0.5          # 折扣率的来源（代码里存 w，用时取 e^{-w}）\nu = 0.0          # 当前词加分 e^u\na, b = 0.0, 0.0  # 两本账：分子账 a、分母账 b\n\nvs = [2, 4, 8]   # 三个词的内容（发言分量）\n\nfor t, v in enumerate(vs, start=1):\n    k = 0.0  # 简化：让每个词的权重 e^k = 1\n\n    # 第一步【读账】：旧账 + 新词，算加权平均\n    wkv = (a + math.exp(u + k) * v) / (b + math.exp(u + k))\n\n    # 第二步【记账】：旧账打折扣（e^{-w}），新账入册（e^k）\n    a = math.exp(-w) * a + math.exp(k) * v\n    b = math.exp(-w) * b + math.exp(k)\n\n    print(f\"第{t}步: 输出 wkv = {wkv:.3f}, 分子账 a = {a:.3f}, 分母账 b = {b:.3f}\")"
+    "code": "import math\n\nw = 0.5          # the discount rate (stored as w; use e^{-w} when computing)\nu = 0.0          # current word bonus e^u\na, b = 0.0, 0.0  # the two ledgers: numerator a, denominator b\n\nvs = [2, 4, 8]   # content (speaking weight) of the three words\n\nfor t, v in enumerate(vs, start=1):\n    k = 0.0  # simplified: make every word's weight e^k = 1\n\n    # Step 1 [read the ledger]: old ledger + new word -> weighted average\n    wkv = (a + math.exp(u + k) * v) / (b + math.exp(u + k))\n\n    # Step 2 [record]: discount the old ledger (e^{-w}), enter the new entry (e^k)\n    a = math.exp(-w) * a + math.exp(k) * v\n    b = math.exp(-w) * b + math.exp(k)\n\n    print(f\"Step {t}: output wkv = {wkv:.3f}, numerator a = {a:.3f}, denominator b = {b:.3f}\")"
   },
   {
     "para": "Run it (type python rwkv_core.py on the command line): the first two steps match the hand calculation exactly (2.000, 3.000), and step three outputs 5.069 - slightly below the hand-computed 5.2. Reason: the code uses the true discount e^(-0.5) ≈ 0.607 (the hand version rounded it to 0.5 for easy arithmetic), so the old ledger survives a bit more and the new token 8 gets slightly diluted. Reminder: approximations are fine for hand calculation, but always verify against the code's true values."

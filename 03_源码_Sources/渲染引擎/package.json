@@ -11,6 +11,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "docx": "^9.15.3",
     "z-ai-web-dev-sdk": "^0.0.18"
   }
 }

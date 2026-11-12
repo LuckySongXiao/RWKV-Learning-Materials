@@ -10,11 +10,11 @@ const {
 } = require("docx");
 const fs = require("fs");
 
-const p12 = require("./textbook_en_part12.js");
-const p345 = require("./textbook_en_part345.js");
-const p6 = require("./textbook_en_part6.js");
-const p7 = require("./textbook_en_part7.js");
-const apx2 = require("./textbook_en_appendix2.js");
+const p12 = require("../教材数据_英文/textbook_en_part12.js");
+const p345 = require("../教材数据_英文/textbook_en_part345.js");
+const p6 = require("../教材数据_英文/textbook_en_part6.js");
+const p7 = require("../教材数据_英文/textbook_en_part7.js");
+const apx2 = require("../教材数据_英文/textbook_en_appendix2.js");
 const ALL = [...p12.PART1, ...p12.PART2, ...p345.PART3, ...p345.PART4, ...p345.PART5, ...p6.PART6, ...p7.PART7, ...p345.APPENDIX, ...apx2.APPENDIX2];
 
 // ── DM-1 调色板（AI 科技）──
@@ -304,7 +304,7 @@ function renderBlock(blk) {
       out.push(framedBlock([
         new Paragraph({
           spacing: { line: 280, after: 50 },
-          children: [new TextRun({ text: "\u3010\u4f8b\u3011", size: 21, bold: true, color: "8A6D3B", font: { eastAsia: "SimHei", ascii: "Arial" } })],
+          children: [new TextRun({ text: "[Example]", size: 21, bold: true, color: "8A6D3B", font: { eastAsia: "SimHei", ascii: "Arial" } })],
         }),
         ...lines.map((l, i, arr) => new Paragraph({
           spacing: { line: 300, after: i === arr.length - 1 ? 0 : 40 },
@@ -330,7 +330,7 @@ function renderBlock(blk) {
       out.push(framedBlock([new Paragraph({
         spacing: { line: 312, after: 0 },
         children: [
-          new TextRun({ text: "\u3010\u63D0\u793A\u3011", size: 24, bold: true, color: H1_COLOR, font: HEAD_FONT }),
+          new TextRun({ text: "[Note]", size: 24, bold: true, color: H1_COLOR, font: HEAD_FONT }),
           new TextRun({ text: val, size: 24, color: "262626", font: BODY_FONT }),
         ],
       })], P.table.surface));
@@ -377,7 +377,7 @@ const PART_DIVIDERS = {
 
 // ── 组装正文 ──
 // 教材插图：h2 标题（含关键词）渲染后插入对应图
-const FIGS = "/home/z/my-project/share/projects/6ad85ab25dddfa3997dd173e/tmp/figs_en";
+const FIGS = "../../02_插图_Figures/English";
 const FIG_AFTER_H2 = [
   { match: "\u7b2c 4 \u7ae0", file: "fig1_memory_en.png", w: 1180, h: 442, cap: "Figure 1 | Three ways to remember: class-wide note passing vs one-person whispering vs a bookkeeping messenger" },
   { match: "\u7b2c 6 \u7ae0", file: "fig2_ledger_en.png", w: 1120, h: 592, cap: "Figure 2 | The WKV ledger: each new token takes only two steps (read the balance, then update it)" },
@@ -451,13 +451,13 @@ const numFooter = new Footer({
 const tocChildren = [
   new Paragraph({
     alignment: AlignmentType.CENTER, spacing: { before: 200, after: 300 },
-    children: [new TextRun({ text: "\u76ee\u5f55", size: 36, bold: true, color: H1_COLOR, font: HEAD_FONT })],
+    children: [new TextRun({ text: "Contents", size: 36, bold: true, color: H1_COLOR, font: HEAD_FONT })],
   }),
-  new TableOfContents("\u76ee\u5f55", { hyperlink: true, headingStyleRange: "1-2" }),
+  new TableOfContents("Contents", { hyperlink: true, headingStyleRange: "1-2" }),
   new Paragraph({
     spacing: { before: 200 },
     children: [new TextRun({
-      text: "\u6253\u5f00\u6587\u6863\u540e\uff0c\u8bf7\u53f3\u952e\u70b9\u51fb\u76ee\u5f55\u5e76\u9009\u62e9\u201c\u66f4\u65b0\u57df\u201d\u4ee5\u5237\u65b0\u9875\u7801\u3002",
+      text: "After opening the document, right-click the table of contents and choose \u201cUpdate Field\u201d to refresh the page numbers.",
       size: 18, italics: true, color: "8A9BA8", font: BODY_FONT,
     })],
   }),

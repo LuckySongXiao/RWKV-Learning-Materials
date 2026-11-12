@@ -213,7 +213,7 @@ const PART7 = [
     "para": "Where does the data come from? Human annotation of one trajectory takes minutes; annotating 50,000 is a fortune. The community playbook is threefold: (1) synthesis - let a strong model (a teacher) generate tasks and trajectories from templates, with rule-based scripts auto-grading and filtering (can the JSON be parsed, does the tool name actually exist, does the answer hit); (2) backflow - record real online failure cases (the full context at the moment of a copy-loop, say) and turn them into counter-examples or corrected samples - the most precious data of all; (3) distillation - start from open Agent trajectory datasets (ToolBench, AgentInstruct and the like) and rewrite them in your own format templates. Note the twist on Section 24.5's lesson: the format inside the training data must be exactly the format used at inference (\"Assistant:\" without the space, two User messages, the envelope wrapping tool calls) - a mismatch between training format and serving format means all that training was wasted effort."
   },
   {
-    "para": "Above SFT there is one more \"elective\": preference optimization (DPO/RLHF, a close cousin of Chapter 15's RLHF). Build two trajectories for the same task: one crisp (one tool call, then the wrap-up answer), one sloppy (repeated calls, or calling when a direct answer would do), then tell the model \"the first is better than the second.\" The model does not relearn knowledge; it only adjusts its choice tendencies - a small parameter change, ideal as the final polish after SFT. This layer is still early in the RWKV ecosystem, but it is on the roadmap of the official G1 release."
+    "para": "Above SFT there is one more \"elective\": preference optimization (DPO/RLHF, a close cousin of Chapter 15's RLHF). Build two trajectories for the same task: one crisp (one tool call, then the wrap-up answer), one sloppy (repeated calls, or calling when a direct answer would do), then tell the model \"the first is better than the second.\" The model does not relearn knowledge; it only adjusts its choice tendencies - a small parameter change, ideal as the final polish after SFT. The \"still early\" verdict is already being chased down: in late October 2026, No.22 (the author of the Section 24.5 benchmark) released RWKV-RL-Search-R1 - SFT on RWKV-7 2.9B first, then GRPO in the Search-R1 retrieval QA environment, averaging about 0.40 across the seven sampled sets, closing in on the 0.431 that the Search-R1 paper reports for a 7B model with PPO; the team's next step is the more stable Dr. GRPO. This was the first time the community ran the full RLHF-family alignment training on RWKV and published all process data. Less than a week later (2026-10-26), the official workshop No.4 presented a systematic RLVR (reinforcement learning with verifiable rewards) campaign: DAPO as the main recipe on G1k, after 155 GSM8K warm-up steps then 1000 training steps - GSM8K rose from 59.42% to 71.85% (+12.43 points) and MATH500 from 39.88% to 49.75%; it also specifically treats the \"copy-loop\" fault of Section 24.5 (Anti-Doom, FTPO, TLPO behavior repairs), and names three RL pitfalls unique to recurrent architectures: BF16 small-update write-back losses, extreme sensitivity to parameter perturbations, and reward grading skewed by unit/format ambiguity. The conclusion matches the opening of this section: data, rewards, optimizer, and engineering system - miss none."
   },
   {
     "h3": "24.7 Fit tuning: making the application and the model mesh"
@@ -342,7 +342,7 @@ const PART7 = [
         ],
         [
           "Phone / tablet",
-          "RWKV APP (Flutter cross-platform)",
+          "RWKV APP (Flutter, now an independent org RWKV-APP, 135 stars, covering Android/iOS/Windows)",
           "fully local and offline - a large model in your pocket"
         ],
         [
@@ -458,27 +458,27 @@ const PART7 = [
       ],
       "rows": [
         [
-          "industry (edge)",
-          "Quectel partnership modules landing in IoT; Flutter app covering phones and desktops",
-          "edge-side solution shown at WAIC 2025"
+          "Models",
+          "language (World series) + multimodal (ModRWKV) + the G1 base models (reasoning / code / math)",
+          "the G1 series iterates its data version monthly (G1j→G1k→G1l); 2026-10-31 released G1l 2.9B/13.3B (61 layers, context 34304), with the first official Transformers integration and TileLang acceleration"
         ],
         [
-          "industry (chips)",
-          "dedicated RPU chip plan in progress",
-          "Peng Bo's 2023 \"the decisive battle is in hardware\" declaration is being fulfilled (Chapter 17)"
+          "Academia",
+          "273 related papers; architecture papers have appeared at EMNLP / TMLR / ICLR / IJCAI / EMNLP",
+          "RWKV-7 earned ICLR 2025 recognition (the Chapter 14 expressiveness gold medal)"
         ],
         [
-          "open-source community",
-          "fully open under Apache 2.0; incubated by the LFAI & Data foundation; global volunteers",
+          "Open-source community",
+          "fully open under Apache 2.0; incubated by the LFAI & Data foundation; global volunteers relay",
           "projects like RWKV-Runner / ai00 / rwkv.cpp emerged spontaneously"
         ],
         [
-          "industry (edge side)",
+          "Industry (edge side)",
           "Quectel modules landing in IoT; the Flutter APP covers phones and desktops",
           "edge solution shown at WAIC 2025"
         ],
         [
-          "industry (chips)",
+          "Industry (chips)",
           "the RPU dedicated-chip plan is moving forward",
           "Peng Bo's 2023 \"the decisive battle is in hardware\" declaration is being fulfilled (Chapter 17)"
         ],
@@ -500,7 +500,7 @@ const PART7 = [
     "h3": "26.3 Your Place in This Ecosystem"
   },
   {
-    "para": "Understanding the layout, think about where you can fit in: if you like hands-on work—Chapters 18-23's model creation path plus Chapter 25's device map are enough for you to create your first 'own AI product'; if you like research—pick a thread (vision/timeseries/medicine) from the 266 papers in Appendix C to explore deeply; if you like engineering—the operators and inference engine directions in Appendix G's advanced roadmap always welcome new talent in community projects. The ecosystem's ambition must be realized through the hands-on work of generation after generation of newcomers."
+    "para": "Understanding the layout, think about where you can fit in: if you like hands-on work—Chapters 18-23's model creation path plus Chapter 25's device map are enough for you to create your first 'own AI product'; if you like research—pick a thread (vision/timeseries/medicine) from the 273 papers in Appendix C to explore deeply; if you like engineering—the operators and inference engine directions in Appendix G's advanced roadmap always welcome new talent in community projects. The ecosystem's ambition must be realized through the hands-on work of generation after generation of newcomers."
   },
   {
     "quiz": [

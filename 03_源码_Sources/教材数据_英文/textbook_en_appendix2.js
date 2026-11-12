@@ -85,7 +85,7 @@ const APPENDIX2 = [
     "Chapter 13: erase before write; a = in-context learning rate; spectral radius \u22641 keeps things stable; four wins (LS/FD/DD/GE).",
     "Chapter 14: 3.1T World v3; expressiveness > the old Delta family; measured capacity 0.547 bits per dimension.",
     "Chapter 15: keep ctx_len/vocab_size consistent; AI-assistant vs base-model usage; state tuning only adjusts the little notebook.",
-    "Chapter 16: 7 architecture papers among 266; vision dominates because images slice into sequences and linearity saves memory.",
+    "Chapter 16: 7 architecture papers among 273; vision dominates because images slice into sequences and linearity saves memory.",
     "Chapter 17: RWKV-X = mixed layers (about 25% sparse-attention layers on an RWKV-7 backbone); RWKV-8 = DeepEmbed+ROSA; RPU = a dedicated recurrent processing unit chip, still a plan.",
   ]},
   { h3: "Chapters 18-23" },
